@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <stdexcept>
 #include <type_traits>
+#include <limits>
 
 
 namespace npp{
@@ -18,13 +19,14 @@ namespace npp{
         array(const std::array<std::size_t, Rank>& params)
         :   m_shape(params), 
             m_storage(findSize(params)){
-                
-                std::size_t mul = 1; 
-                for (std::size_t i = Rank; i-- >0;){
-                    m_stride[i] = mul;
-                    mul *= params[i]; 
-                }
-            }
+                computeStride();
+        }
+
+        array(const std::array<std::size_t, Rank>& params, T value)
+        :   m_shape(params), 
+            m_storage(findSize(params), value){
+                computeStride();
+        }
         
         /***********************************************************************************/
         /***************************** Operators overloading *******************************/
@@ -77,6 +79,23 @@ namespace npp{
             return m_storage.empty() ? nullptr : m_storage.data();
         }
 
+        /***********************************************************************************/
+        /********************************** functions **************************************/
+        /***********************************************************************************/
+
+        void reshape(const std::array<std::size_t, Rank>& params){
+            if (params == m_shape){
+                return;
+            }
+
+            if (findSize(params) != m_storage.size()){
+                throw std::invalid_argument("npp::array error: incompatible shape for reshape, reshape would change the number of elements");
+            }
+
+            m_shape = params;
+            computeStride();
+        }
+
         void fill(const T &data){
             std::fill(m_storage.begin(), m_storage.end(), data);
         }
@@ -84,6 +103,9 @@ namespace npp{
         std::size_t rank() const {return Rank;}
         std::size_t size() const {return m_storage.size();}
         const std::array<std::size_t, Rank>& shape() const {return m_shape;}
+        const std::array<std::size_t, Rank>& stride() const {return m_stride;}
+        bool empty() const { return m_storage.empty();}
+
 
 
     
@@ -91,6 +113,14 @@ namespace npp{
         std::array<std::size_t, Rank> m_shape;
         std::vector<T> m_storage;
         std::array<std::size_t, Rank> m_stride;
+
+        void computeStride(){
+            std::size_t mul = 1; 
+            for (std::size_t i = Rank; i-- >0;){
+                m_stride[i] = mul;
+                mul *= m_shape[i]; 
+            }
+        }
 
         template<typename... Index>
         std::array<std::size_t, Rank> checkIndices(Index... indices) const
@@ -127,8 +157,11 @@ namespace npp{
         }
 
         static std::size_t findSize(const std::array<std::size_t, Rank>& params){
-            std::size_t tot = params[0];
-            for (std::size_t i = 1; i < Rank; ++i){
+            std::size_t tot = 1;
+            for (std::size_t i = 0; i < Rank; ++i){
+                if (params[i] != 0 && tot > std::numeric_limits<std::size_t>::max() / params[i]){
+                    throw std::overflow_error("npp::array error: size overflow");
+                }
                 tot *= params[i];
             }
             return tot;
@@ -143,8 +176,10 @@ namespace npp{
             }
             return idx;
         }
-    };
-}
+    }; //class
+} //namespace npp
 
+
+//maybe i could add support for dim = 0
 
 #endif

@@ -18,6 +18,98 @@ void testConstruction(){
     std::cout << "[OK] construction\n";
 }
 
+void testValueConstructor(){
+    npp::array<int, 2> a({3,4}, 42);
+
+    for (const auto& x : a){
+        assert(x == 42);
+    }
+
+    std::cout << "[OK] value constructor\n";
+}
+
+
+void testNegativeIndexing(){
+    npp::array<int, 2> a({2,3});
+
+    int value = 0;
+    for (auto& x : a){
+        x = value++;
+    }
+
+    assert(a(-1,-1) == 5);
+    assert(a(-1,0) == 3);
+    assert(a(0,-1) == 2);
+
+    std::cout << "[OK] negative indexing\n";
+}
+
+
+void testNegativeIndexOutOfBounds(){
+    npp::array<int, 2> a({2,3});
+    bool thrown = false;
+
+    try{
+        a(-3,0);
+    }
+    catch(const std::out_of_range&){
+        thrown = true;
+    }
+
+    assert(thrown);
+
+    thrown = false;
+
+    try{
+        a(0,-4);
+    }
+    catch(const std::out_of_range&){
+        thrown = true;
+    }
+    assert(thrown);
+
+    std::cout << "[OK] negative bounds checking\n";
+}
+
+
+void testStride(){
+    npp::array<int,3> a({2,3,4});
+
+    auto s = a.stride();
+
+    assert(s[0] == 12);
+    assert(s[1] == 4);
+    assert(s[2] == 1);
+
+    std::cout << "[OK] stride\n";
+}
+
+
+void testStrideAfterReshape(){
+    npp::array<int,3> a({2,3,4});
+
+    a.reshape({4,2,3});
+    auto s = a.stride();
+
+    assert(s[0] == 6);
+    assert(s[1] == 3);
+    assert(s[2] == 1);
+
+    std::cout << "[OK] stride after reshape\n";
+}
+
+
+void testZeroDimension2d(){
+    npp::array<int,2> a({0,5});
+
+    assert(a.size() == 0);
+    assert(a.begin() == a.end());
+    assert(a.shape()[0] == 0);
+    assert(a.shape()[1] == 5);
+
+    std::cout << "[OK] zero dimension 2d\n";
+}
+
 
 void testFill(){
     npp::array<int, 2> a({10, 10});
@@ -154,8 +246,109 @@ void testEmptyShapes(){
 }
 
 
+void testReshapeBasic(){
+    npp::array<int, 2> a({3, 4});
+    int value = 0;
+    for (auto& x : a){
+        x = value++;
+    }
+
+    assert(a.shape()[0] == 3);
+    assert(a.shape()[1] == 4);
+
+    a.reshape({2, 6});
+
+    assert(a.shape()[0] == 2);
+    assert(a.shape()[1] == 6);
+
+    for (std::size_t i = 0; i < 12; ++i)
+        assert(a.data()[i] == static_cast<int>(i));
+
+    std::cout << "[OK] reshape basic\n";
+}
+
+
+void testReshapeIndexing(){
+    npp::array<int, 2> a({2, 3});
+
+    int value = 0;
+    for (auto& x : a){
+        x = value++;
+    }
+
+    /*  Before:
+
+        0 1 2
+        3 4 5
+
+        after:
+
+        0 1
+        2 3
+        4 5     */
+
+    a.reshape({3, 2});
+
+    assert(a(0,0) == 0);
+    assert(a(0,1) == 1);
+
+    assert(a(1,0) == 2);
+    assert(a(1,1) == 3);
+
+    assert(a(2,0) == 4);
+    assert(a(2,1) == 5);
+
+    std::cout << "[OK] resshape indexing\n";
+}
+
+
+void testReshapeInvalid(){
+    npp::array<int, 2> a({3, 4});
+
+    bool thrown = false;
+
+    try{
+        a.reshape({5, 5});
+    }
+    catch (const std::invalid_argument&){
+        thrown = true;
+    }
+
+    assert(thrown);
+
+    std::cout << "[OK] reshape invalid\n";
+}
+
+
+void testReshape3d(){
+    npp::array<int, 3> a({2, 3, 4});
+
+    int value = 0;
+    for (auto& x : a){
+        x = value++;
+    }
+
+    a.reshape({4, 3, 2});
+
+    assert(a.shape()[0] == 4);
+    assert(a.shape()[1] == 3);
+    assert(a.shape()[2] == 2);
+
+    //last elem
+    assert(a(3,2,1) == 23);
+
+    std::cout << "[OK] reshape 3d\n";
+}
+
+
 int main(){
     testConstruction();
+    testValueConstructor();
+    testNegativeIndexing();
+    testNegativeIndexOutOfBounds();
+    testStride();
+    testStrideAfterReshape();
+    testZeroDimension2d();
     testFill();
     testIteratorWrite();
     testConstIterator();
@@ -165,6 +358,10 @@ int main(){
     testBounds();
     testCopy();
     testEmptyShapes();
+    testReshapeBasic();
+    testReshapeIndexing();
+    testReshape3d();
+    testReshapeInvalid();
 
     std::cout << "\nALL TESTS PASSED\n";
 }
