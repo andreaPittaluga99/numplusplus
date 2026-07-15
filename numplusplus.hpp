@@ -215,6 +215,4 @@ namespace npp{
 } //namespace npp
 
 
-//maybe i could add support for dim = 0
-
 #endif
