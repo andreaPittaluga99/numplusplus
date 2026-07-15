@@ -341,6 +341,86 @@ void testReshape3d(){
 }
 
 
+void testCopyConstructor(){
+    npp::array<int,2> a({2,3}, 7);
+
+    npp::array<int,2> b = a;
+
+    assert(b.shape()[0] == 2);
+    assert(b.shape()[1] == 3);
+    assert(b.size() == 6);
+
+    for (auto x : b){
+        assert(x == 7);
+    }
+
+    // verifica che siano indipendenti
+    b(0,0) = 100;
+
+    assert(a(0,0) == 7);
+    assert(b(0,0) == 100);
+
+    std::cout << "[OK] copy constructor\n";
+}
+
+
+void testCopyAssignment(){
+    npp::array<int,2> a({2,3}, 5);
+    npp::array<int,2> b({4,4}, 9);
+
+    b = a;
+
+    assert(b.shape()[0] == 2);
+    assert(b.shape()[1] == 3);
+    assert(b.size() == 6);
+
+    for (auto x : b){
+        assert(x == 5);
+    }
+
+    b(0,0) = 50;
+
+    assert(a(0,0) == 5);
+
+    std::cout << "[OK] copy assignment\n";
+}
+
+
+void testMoveConstructor(){
+    npp::array<int,2> a({3,3}, 8);
+
+    npp::array<int,2> b = std::move(a);
+
+    assert(b.shape()[0] == 3);
+    assert(b.shape()[1] == 3);
+    assert(b.size() == 9);
+
+    for (auto x : b){
+        assert(x == 8);
+    }
+
+    std::cout << "[OK] move constructor\n";
+}
+
+
+void testMoveAssignment(){
+    npp::array<int,2> a({2,4}, 6);
+    npp::array<int,2> b({10,10}, 1);
+
+    b = std::move(a);
+
+    assert(b.shape()[0] == 2);
+    assert(b.shape()[1] == 4);
+    assert(b.size() == 8);
+
+    for (auto x : b){
+        assert(x == 6);
+    }
+
+    std::cout << "[OK] move assignment\n";
+}
+
+
 int main(){
     testConstruction();
     testValueConstructor();
@@ -362,6 +442,10 @@ int main(){
     testReshapeIndexing();
     testReshape3d();
     testReshapeInvalid();
+    testCopyConstructor();
+    testCopyAssignment();
+    testMoveConstructor();
+    testMoveAssignment();
 
     std::cout << "\nALL TESTS PASSED\n";
 }

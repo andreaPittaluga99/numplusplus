@@ -15,7 +15,9 @@ namespace npp{
         static_assert(Rank > 0, "npp::array error: Rank must be greater than 0");
 
         public:
-        
+        /***********************************************************************************/
+        /********************************** Constructors ***********************************/
+        /***********************************************************************************/
         array(const std::array<std::size_t, Rank>& params)
         :   m_shape(params), 
             m_storage(findSize(params)){
@@ -27,7 +29,16 @@ namespace npp{
             m_storage(findSize(params), value){
                 computeStride();
         }
+
+        array(array&& other) noexcept
+        :   m_shape(std::move(other.m_shape)),
+            m_storage(std::move(other.m_storage)),
+            m_stride(std::move(other.m_stride)){}
         
+        array(const array& other)
+        :   m_shape(other.m_shape),
+            m_storage(other.m_storage),
+            m_stride(other.m_stride){}
         /***********************************************************************************/
         /***************************** Operators overloading *******************************/
         /***********************************************************************************/
@@ -43,6 +54,24 @@ namespace npp{
             auto idx = checkIndices(indices...);
             return m_storage[calculateIndex(idx)];
         }
+
+        array& operator= (array&& other) noexcept{
+            if(this != &other){
+                m_shape = std::move(other.m_shape);
+                m_storage = std::move(other.m_storage);
+                m_stride = std::move(other.m_stride);
+            }
+            return *this;
+        }
+
+        array& operator=(const array& other){
+            if(this != &other){
+                m_shape = other.m_shape;
+                m_storage = other.m_storage;
+                m_stride = other.m_stride;
+            }
+            return *this;
+        } 
 
         /***********************************************************************************/
         /********************************** Iterators **************************************/
