@@ -420,6 +420,59 @@ void testMoveAssignment(){
     std::cout << "[OK] move assignment\n";
 }
 
+void testSwap(){
+    npp::array<int,2> a({2,3});
+    npp::array<int,2> b({3,2});
+
+    int value = 0;
+    for(auto& x : a){
+        x = value++;
+    }
+
+    value = 100;
+    for(auto& x : b){
+        x = value++;
+    }
+
+    a.swap(b);
+
+    // shape changed
+    assert(a.shape()[0] == 3);
+    assert(a.shape()[1] == 2);
+
+    assert(b.shape()[0] == 2);
+    assert(b.shape()[1] == 3);
+
+    assert(a.size() == 6);
+    assert(b.size() == 6);
+
+    // storage changed
+    assert(a(0,0) == 100);
+    assert(a(0,1) == 101);
+    assert(a(1,0) == 102);
+    assert(a(1,1) == 103);
+    assert(a(2,0) == 104);
+    assert(a(2,1) == 105);
+
+    assert(b(0,0) == 0);
+    assert(b(0,1) == 1);
+    assert(b(0,2) == 2);
+    assert(b(1,0) == 3);
+    assert(b(1,1) == 4);
+    assert(b(1,2) == 5);
+
+    // swap w self
+    a.swap(a);
+
+    assert(a.shape()[0] == 3);
+    assert(a.shape()[1] == 2);
+    assert(a(0,0) == 100);
+    assert(a(2,1) == 105);
+
+
+    std::cout << "[OK] swap\n";
+}
+
 
 int main(){
     testConstruction();
@@ -446,6 +499,8 @@ int main(){
     testCopyAssignment();
     testMoveConstructor();
     testMoveAssignment();
+    testSwap();
+    
 
     std::cout << "\nALL TESTS PASSED\n";
 }

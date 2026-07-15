@@ -129,6 +129,12 @@ namespace npp{
             std::fill(m_storage.begin(), m_storage.end(), data);
         }
 
+        void swap(array& other) noexcept{
+            std::swap(m_shape, other.m_shape);
+            std::swap(m_storage, other.m_storage);
+            std::swap(m_stride, other.m_stride);
+        }
+
         std::size_t rank() const {return Rank;}
         std::size_t size() const {return m_storage.size();}
         const std::array<std::size_t, Rank>& shape() const {return m_shape;}
