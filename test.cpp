@@ -474,6 +474,159 @@ void testSwap(){
 }
 
 
+void testArrayArithmetic(){
+    npp::array<int,1> a({5});
+    npp::array<int,1> b({5});
+
+    for(std::size_t i = 0; i < 5; ++i){
+        a(i) = static_cast<int>(i);
+        b(i) = 10;
+    }
+
+    auto c = a + b;
+
+    assert(c(0) == 10);
+    assert(c(1) == 11);
+    assert(c(2) == 12);
+    assert(c(3) == 13);
+    assert(c(4) == 14);
+
+    auto d = b - a;
+
+    assert(d(0) == 10);
+    assert(d(1) == 9);
+    assert(d(2) == 8);
+    assert(d(3) == 7);
+    assert(d(4) == 6);
+
+    auto e = a * b;
+
+    assert(e(0) == 0);
+    assert(e(1) == 10);
+    assert(e(2) == 20);
+    assert(e(3) == 30);
+    assert(e(4) == 40);
+
+    auto f = b / b;
+
+    for(auto x : f){
+        assert(x == 1);
+    }
+
+    std::cout << "[OK] array arithmetic\n";
+}
+
+
+void testCompoundArithmetic(){
+    npp::array<int,1> a({5}, 2);
+    npp::array<int,1> b({5}, 3);
+
+    a += b;
+    for(auto x : a){
+        assert(x == 5);
+    }
+
+    a -= b;
+    for(auto x : a){
+        assert(x == 2);
+    }
+
+
+    a *= b;
+    for(auto x : a){
+        assert(x == 6);
+    }
+
+    a /= b;
+    for(auto x : a){
+        assert(x == 2);
+    }
+
+    std::cout << "[OK] compound arithmetic\n";
+}
+
+
+void testScalarArithmetic(){
+    npp::array<int,1> a({5}, 10);
+
+    auto b = a + 5;
+    for(auto x : b){
+        assert(x == 15);
+    }
+
+    auto c = a - 5;
+    for(auto x : c){
+        assert(x == 5);
+    }
+
+    auto d = a * 2;
+    for(auto x : d){
+        assert(x == 20);
+    }
+
+    auto e = a / 2;
+    for(auto x : e){
+        assert(x == 5);
+    }
+
+    std::cout << "[OK] scalar arithmetic\n";
+}
+
+
+void testReverseScalarArithmetic(){
+    npp::array<int,1> a({5}, 10);
+
+    auto b = 5 + a;
+
+    for(auto x : b){
+        assert(x == 15);
+    }
+
+
+    auto c = 20 - a;
+
+    for(auto x : c){
+        assert(x == 10);
+    }
+
+
+    auto d = 2 * a;
+
+    for(auto x : d){
+        assert(x == 20);
+    }
+
+
+    auto e = 100 / a;
+
+    for(auto x : e){
+        assert(x == 10);
+    }
+
+
+    std::cout << "[OK] reverse scalar arithmetic\n";
+}
+
+
+void testArithmeticShapeMismatch(){
+    npp::array<int,1> a({3}, 1);
+    npp::array<int,1> b({4}, 1);
+
+    bool thrown = false;
+
+    try{
+        auto c = a + b;
+    }
+    catch(const std::invalid_argument&){
+        thrown = true;
+    }
+
+    assert(thrown);
+
+    std::cout << "[OK] arithmetic shape mismatch\n";
+}
+
+
 int main(){
     testConstruction();
     testValueConstructor();
@@ -500,6 +653,11 @@ int main(){
     testMoveConstructor();
     testMoveAssignment();
     testSwap();
+    testArrayArithmetic();
+    testCompoundArithmetic();
+    testScalarArithmetic();
+    testReverseScalarArithmetic();
+    testArithmeticShapeMismatch();
     
 
     std::cout << "\nALL TESTS PASSED\n";

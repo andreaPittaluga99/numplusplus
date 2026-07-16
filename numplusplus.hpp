@@ -71,7 +71,139 @@ namespace npp{
                 m_stride = other.m_stride;
             }
             return *this;
-        } 
+        }
+
+        array& operator+= (const array& other){
+            checkShape(other);
+            for (std::size_t i = 0; i < m_storage.size(); ++i){
+                m_storage[i] += other.m_storage[i];
+            }
+            return *this;
+        }
+
+        array operator+ (const array& other) const {
+            array res(*this);
+            res += other;
+            return res; 
+        }
+
+        array& operator-= (const array& other){
+            checkShape(other);
+            for (std::size_t i = 0; i < m_storage.size(); ++i){
+                m_storage[i] -= other.m_storage[i];
+            }
+            return *this;
+        }
+
+        array operator- (const array& other) const {
+            array res(*this);
+            res -= other;
+            return res; 
+        }
+
+        array& operator*= (const array& other){
+            checkShape(other);
+            for (std::size_t i = 0; i < m_storage.size(); ++i){
+                m_storage[i] *= other.m_storage[i];
+            }
+            return *this;
+        }
+
+        array operator* (const array& other) const {
+            array res(*this);
+            res *= other;
+            return res; 
+        }
+
+        array& operator/= (const array& other){
+            checkShape(other);
+            for (std::size_t i = 0; i < m_storage.size(); ++i){
+                m_storage[i] /= other.m_storage[i];
+            }
+            return *this;
+        }
+
+        array operator/ (const array& other) const {
+            array res(*this);
+            res /= other;
+            return res; 
+        }
+
+
+        /*********************************** Scalar operators ******************************/
+
+        template<typename Scalar>
+        requires std::is_arithmetic_v<Scalar>
+        array& operator+= (Scalar value){
+            for(auto& x : m_storage){
+                x += value;
+            }
+            return *this;
+        }
+
+
+        template<typename Scalar>
+        requires std::is_arithmetic_v<Scalar>
+        array operator+ (Scalar value) const{
+            array res(*this);
+            res += value;
+            return res;
+        }
+        
+        template<typename Scalar>
+        requires std::is_arithmetic_v<Scalar>
+        array& operator-= (Scalar value){
+            for(auto& x : m_storage){
+                x -= value;
+            }
+            return *this;
+        }
+
+
+        template<typename Scalar>
+        requires std::is_arithmetic_v<Scalar>
+        array operator- (Scalar value) const{
+            array res(*this);
+            res -= value;
+            return res;
+        }
+        
+        template<typename Scalar>
+        requires std::is_arithmetic_v<Scalar>
+        array& operator*= (Scalar value){
+            for(auto& x : m_storage){
+                x *= value;
+            }
+            return *this;
+        }
+
+
+        template<typename Scalar>
+        requires std::is_arithmetic_v<Scalar>
+        array operator* (Scalar value) const{
+            array res(*this);
+            res *= value;
+            return res;
+        }
+        
+        template<typename Scalar>
+        requires std::is_arithmetic_v<Scalar>
+        array& operator/= (Scalar value){
+            for(auto& x : m_storage){
+                x /= value;
+            }
+            return *this;
+        }
+
+
+        template<typename Scalar>
+        requires std::is_arithmetic_v<Scalar>
+        array operator/ (Scalar value) const{
+            array res(*this);
+            res /= value;
+            return res;
+        }
+        
 
         /***********************************************************************************/
         /********************************** Iterators **************************************/
@@ -195,7 +327,61 @@ namespace npp{
             }
             return idx;
         }
+
+        void checkShape(const array& other) const {
+            if (m_shape != other.m_shape) {
+                throw std::invalid_argument("npp::array error: incompatible array shapes");
+            }
+        }
+
+
     }; //class
+
+    /************************************ Scalars Operators *********************************************/
+    template<typename T, std::size_t Rank, typename Scalar>
+    requires std::is_arithmetic_v<Scalar>
+    array<T, Rank> operator+(Scalar value, const array<T, Rank>& arr){
+        array<T, Rank> res(arr);
+    
+        for (std::size_t i = 0; i < res.size(); ++i){
+            res.data()[i] += value;
+        }
+        return res;
+    }
+
+    template<typename T, std::size_t Rank, typename Scalar>
+    requires std::is_arithmetic_v<Scalar>
+    array<T, Rank> operator-(Scalar value, const array<T, Rank>& arr){
+        array<T, Rank> res(arr);
+    
+        for (std::size_t i = 0; i < res.size(); ++i){
+            res.data()[i] = value - arr.data()[i];
+        }
+        return res;
+    }
+
+    template<typename T, std::size_t Rank, typename Scalar>
+    requires std::is_arithmetic_v<Scalar>
+    array<T, Rank> operator*(Scalar value, const array<T, Rank>& arr){
+        array<T, Rank> res(arr);
+    
+        for (std::size_t i = 0; i < res.size(); ++i){
+            res.data()[i] = value * arr.data()[i];
+        }
+        return res;
+    }
+
+    template<typename T, std::size_t Rank, typename Scalar>
+    requires std::is_arithmetic_v<Scalar>
+    array<T, Rank> operator/(Scalar value, const array<T, Rank>& arr){
+        array<T, Rank> res(arr);
+    
+        for (std::size_t i = 0; i < res.size(); ++i){
+            res.data()[i] = value / res.data()[i];
+        }
+    
+        return res;
+    }
 } //namespace npp
 
 
