@@ -78,35 +78,19 @@ namespace npp{
         /***********************************************************************************/
 
 
-        typename std::vector<T>::const_iterator begin() const {
-            return m_storage.begin();
-        }
-        typename std::vector<T>::iterator begin(){
-            return m_storage.begin();
-        }
+        typename std::vector<T>::const_iterator begin() const { return m_storage.begin(); }
+        typename std::vector<T>::iterator begin(){ return m_storage.begin(); }
         
-        typename std::vector<T>::const_iterator end() const{
-            return m_storage.end();
-        }
+        typename std::vector<T>::const_iterator end() const{ return m_storage.end(); }
 
-        typename std::vector<T>::iterator end(){
-            return m_storage.end();
-        }
-        typename std::vector<T>::const_iterator cbegin() const {
-            return m_storage.cbegin();
-        }
+        typename std::vector<T>::iterator end(){ return m_storage.end(); }
+        typename std::vector<T>::const_iterator cbegin() const { return m_storage.cbegin(); }
 
-        typename std::vector<T>::const_iterator cend() const{
-            return m_storage.cend();
-        }
+        typename std::vector<T>::const_iterator cend() const { return m_storage.cend(); }
 
-        const T* data() const {
-            return m_storage.empty() ? nullptr : m_storage.data();
-        }
+        const T* data() const { return m_storage.empty() ? nullptr : m_storage.data(); }
 
-        T* data(){
-            return m_storage.empty() ? nullptr : m_storage.data();
-        }
+        T* data() { return m_storage.empty() ? nullptr : m_storage.data(); }
 
         /***********************************************************************************/
         /********************************** functions **************************************/
@@ -145,6 +129,7 @@ namespace npp{
 
     
     private:
+
         std::array<std::size_t, Rank> m_shape;
         std::vector<T> m_storage;
         std::array<std::size_t, Rank> m_stride;
@@ -158,8 +143,7 @@ namespace npp{
         }
 
         template<typename... Index>
-        std::array<std::size_t, Rank> checkIndices(Index... indices) const
-        {
+        std::array<std::size_t, Rank> checkIndices(Index... indices) const{
             static_assert(sizeof...(Index) == Rank, "npp::array error: wrong number of indices");
         
             static_assert((std::is_integral_v<Index> && ...), "npp::array error: indices must be integer types");
