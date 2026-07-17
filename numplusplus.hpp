@@ -7,7 +7,7 @@
 #include <stdexcept>
 #include <type_traits>
 #include <limits>
-
+#include <utility>
 
 namespace npp{
     template<typename T, std::size_t Rank>
@@ -74,10 +74,12 @@ namespace npp{
             return *this;
         }
 
+        [[nodiscard]]
         bool operator==(const array& other) const noexcept {
             return m_shape == other.m_shape && m_storage == other.m_storage;
         }
 
+        [[nodiscard]]
         bool operator!=(const array& other) const noexcept{
             return !(*this == other);
         }
@@ -90,6 +92,7 @@ namespace npp{
             return *this;
         }
 
+        [[nodiscard]]
         array operator+ (const array& other) const {
             array res(*this);
             res += other;
@@ -104,6 +107,7 @@ namespace npp{
             return *this;
         }
 
+        [[nodiscard]]
         array operator- (const array& other) const {
             array res(*this);
             res -= other;
@@ -118,6 +122,7 @@ namespace npp{
             return *this;
         }
 
+        [[nodiscard]]
         array operator* (const array& other) const {
             array res(*this);
             res *= other;
@@ -132,6 +137,7 @@ namespace npp{
             return *this;
         }
 
+        [[nodiscard]]
         array operator/ (const array& other) const {
             array res(*this);
             res /= other;
@@ -153,6 +159,7 @@ namespace npp{
 
         template<typename Scalar>
         requires std::is_arithmetic_v<Scalar>
+        [[nodiscard]]
         array operator+ (Scalar value) const{
             array res(*this);
             res += value;
@@ -171,6 +178,7 @@ namespace npp{
 
         template<typename Scalar>
         requires std::is_arithmetic_v<Scalar>
+        [[nodiscard]]
         array operator- (Scalar value) const{
             array res(*this);
             res -= value;
@@ -189,6 +197,7 @@ namespace npp{
 
         template<typename Scalar>
         requires std::is_arithmetic_v<Scalar>
+        [[nodiscard]]
         array operator* (Scalar value) const{
             array res(*this);
             res *= value;
@@ -207,6 +216,7 @@ namespace npp{
 
         template<typename Scalar>
         requires std::is_arithmetic_v<Scalar>
+        [[nodiscard]]
         array operator/ (Scalar value) const{
             array res(*this);
             res /= value;
@@ -218,19 +228,22 @@ namespace npp{
         /********************************** Iterators **************************************/
         /***********************************************************************************/
 
-
         typename std::vector<T>::const_iterator begin() const noexcept { return m_storage.begin(); }
+        
         typename std::vector<T>::iterator begin() noexcept { return m_storage.begin(); }
         
         typename std::vector<T>::const_iterator end() const noexcept{ return m_storage.end(); }
 
         typename std::vector<T>::iterator end() noexcept { return m_storage.end(); }
+        
         typename std::vector<T>::const_iterator cbegin() const noexcept { return m_storage.cbegin(); }
 
         typename std::vector<T>::const_iterator cend() const noexcept { return m_storage.cend(); }
 
+        [[nodiscard]]
         const T* data() const noexcept { return m_storage.empty() ? nullptr : m_storage.data(); }
 
+        [[nodiscard]]
         T* data() noexcept { return m_storage.empty() ? nullptr : m_storage.data(); }
 
         /***********************************************************************************/
@@ -260,10 +273,19 @@ namespace npp{
             std::swap(m_stride, other.m_stride);
         }
 
+        [[nodiscard]]
         std::size_t rank() const noexcept {return Rank;}
+        
+        [[nodiscard]]
         std::size_t size() const noexcept {return m_storage.size();}
+        
+        [[nodiscard]]
         const std::array<std::size_t, Rank>& shape() const noexcept {return m_shape;}
+        
+        [[nodiscard]]
         const std::array<std::size_t, Rank>& stride() const noexcept {return m_stride;}
+        
+        [[nodiscard]]
         bool empty() const noexcept { return m_storage.empty();}
 
 
@@ -349,6 +371,7 @@ namespace npp{
     /************************************ Scalars Operators *********************************************/
     template<typename T, std::size_t Rank, typename Scalar>
     requires std::is_arithmetic_v<Scalar>
+    [[nodiscard]]
     array<T, Rank> operator+(Scalar value, const array<T, Rank>& arr){
         array<T, Rank> res(arr);
     
@@ -360,6 +383,7 @@ namespace npp{
 
     template<typename T, std::size_t Rank, typename Scalar>
     requires std::is_arithmetic_v<Scalar>
+    [[nodiscard]]
     array<T, Rank> operator-(Scalar value, const array<T, Rank>& arr){
         array<T, Rank> res(arr);
     
@@ -371,6 +395,7 @@ namespace npp{
 
     template<typename T, std::size_t Rank, typename Scalar>
     requires std::is_arithmetic_v<Scalar>
+    [[nodiscard]]
     array<T, Rank> operator*(Scalar value, const array<T, Rank>& arr){
         array<T, Rank> res(arr);
     
@@ -382,6 +407,7 @@ namespace npp{
 
     template<typename T, std::size_t Rank, typename Scalar>
     requires std::is_arithmetic_v<Scalar>
+    [[nodiscard]]
     array<T, Rank> operator/(Scalar value, const array<T, Rank>& arr){
         array<T, Rank> res(arr);
     
