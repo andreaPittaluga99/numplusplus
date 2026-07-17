@@ -13,6 +13,7 @@ namespace npp{
     template<typename T, std::size_t Rank>
     class array{
         static_assert(Rank > 0, "npp::array error: Rank must be greater than 0");
+        static_assert(std::is_arithmetic_v<T>, "npp::array error: T must be an arithmetic type");
 
         public:
         /***********************************************************************************/
@@ -71,6 +72,14 @@ namespace npp{
                 m_stride = other.m_stride;
             }
             return *this;
+        }
+
+        bool operator==(const array& other) const noexcept {
+            return m_shape == other.m_shape && m_storage == other.m_storage;
+        }
+
+        bool operator!=(const array& other) const noexcept{
+            return !(*this == other);
         }
 
         array& operator+= (const array& other){
@@ -210,19 +219,19 @@ namespace npp{
         /***********************************************************************************/
 
 
-        typename std::vector<T>::const_iterator begin() const { return m_storage.begin(); }
-        typename std::vector<T>::iterator begin(){ return m_storage.begin(); }
+        typename std::vector<T>::const_iterator begin() const noexcept { return m_storage.begin(); }
+        typename std::vector<T>::iterator begin() noexcept { return m_storage.begin(); }
         
-        typename std::vector<T>::const_iterator end() const{ return m_storage.end(); }
+        typename std::vector<T>::const_iterator end() const noexcept{ return m_storage.end(); }
 
-        typename std::vector<T>::iterator end(){ return m_storage.end(); }
-        typename std::vector<T>::const_iterator cbegin() const { return m_storage.cbegin(); }
+        typename std::vector<T>::iterator end() noexcept { return m_storage.end(); }
+        typename std::vector<T>::const_iterator cbegin() const noexcept { return m_storage.cbegin(); }
 
-        typename std::vector<T>::const_iterator cend() const { return m_storage.cend(); }
+        typename std::vector<T>::const_iterator cend() const noexcept { return m_storage.cend(); }
 
-        const T* data() const { return m_storage.empty() ? nullptr : m_storage.data(); }
+        const T* data() const noexcept { return m_storage.empty() ? nullptr : m_storage.data(); }
 
-        T* data() { return m_storage.empty() ? nullptr : m_storage.data(); }
+        T* data() noexcept { return m_storage.empty() ? nullptr : m_storage.data(); }
 
         /***********************************************************************************/
         /********************************** functions **************************************/
@@ -251,11 +260,11 @@ namespace npp{
             std::swap(m_stride, other.m_stride);
         }
 
-        std::size_t rank() const {return Rank;}
-        std::size_t size() const {return m_storage.size();}
-        const std::array<std::size_t, Rank>& shape() const {return m_shape;}
-        const std::array<std::size_t, Rank>& stride() const {return m_stride;}
-        bool empty() const { return m_storage.empty();}
+        std::size_t rank() const noexcept {return Rank;}
+        std::size_t size() const noexcept {return m_storage.size();}
+        const std::array<std::size_t, Rank>& shape() const noexcept {return m_shape;}
+        const std::array<std::size_t, Rank>& stride() const noexcept {return m_stride;}
+        bool empty() const noexcept { return m_storage.empty();}
 
 
 
@@ -320,7 +329,7 @@ namespace npp{
 
         
 
-        std::size_t calculateIndex(const std::array<std::size_t, Rank>& indices) const {
+        std::size_t calculateIndex(const std::array<std::size_t, Rank>& indices) const noexcept{
             std::size_t idx = 0;
             for (std::size_t i = 0; i < Rank; ++i){
                 idx += indices[i] * m_stride[i];
