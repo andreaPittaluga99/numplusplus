@@ -8,17 +8,117 @@
 #include <type_traits>
 #include <limits>
 #include <utility>
+#include <initializer_list>
+
+
+/*
+    Study note:
+    it builds a nested std::initializer_list type matching the array rank.
+
+    Example:
+        Rank = 3
+
+        initializer_list<
+            initializer_list<
+                initializer_list<T>
+            >
+        >
+*/
+
+template<typename T, std::size_t Rank>
+struct nested_initializer{
+    using type = std::initializer_list<typename nested_initializer<T, Rank-1>::type>;
+};
+
+/*
+    IMPORTANT:
+        We need to specify a base case so we dont get to <T, 0>.
+*/
+template<typename T>
+struct nested_initializer<T,1>{
+    using type = std::initializer_list<T>;
+};
+
+
+/************************************** Initializer list utilities *********************************************************/
+
+/*
+    Converts a nested initializer_list into a flat storage vector.
+*/
+template<typename T, std::size_t Rank>
+void flatten(typename nested_initializer<T, Rank>::type init, std::vector<T>& storage){
+    
+    /*
+        Study note: 
+        if constexpr removes the unused branch during compilation.
+    */
+    if constexpr (Rank == 1){
+        for (const auto& value : init){
+            storage.push_back(value);
+        }
+    }
+    else{
+        for (const auto& sub : init){
+            flatten<T, Rank-1>(sub, storage);
+        }
+    }
+}
+
+
+/*
+    Recursively extracts the array shape from a nested initializer_list
+    Every level must have the same size, or the initializer list is 
+    considered non-rectangular.
+*/
+template<typename T, std::size_t CurrentRank, std::size_t OriginalRank>
+void getShape(typename nested_initializer<T, CurrentRank>::type init, std::array<std::size_t, OriginalRank>& shape, std::size_t actualDepth = 0){
+    if(init.size() == 0){
+        throw std::invalid_argument( "npp::array error: empty initializer list");
+    }
+    
+    shape[actualDepth] = init.size();
+
+    if constexpr(CurrentRank > 1){
+        std::size_t sizeRef = init.begin()->size();
+        for (const auto& sub : init){
+            if (sub.size() != sizeRef){
+                throw std::invalid_argument(
+                    "npp::array error: non rectangular initializer list"
+                );
+            }
+        }
+
+        getShape<T, CurrentRank - 1, OriginalRank>(*init.begin(), shape, actualDepth + 1);
+    }
+}
+
+/*
+
+    (=^..^=)
+
+*/
 
 namespace npp{
+
+
     template<typename T, std::size_t Rank>
     class array{
         static_assert(Rank > 0, "npp::array error: Rank must be greater than 0");
         static_assert(std::is_arithmetic_v<T>, "npp::array error: T must be an arithmetic type");
 
         public:
+
         /***********************************************************************************/
         /********************************** Constructors ***********************************/
         /***********************************************************************************/
+
+
+        /*
+            Creates an uninitialized array with the given shape.
+
+            Storage is allocated according to the total number of elements.
+            Elements are value-initialized by std::vector.
+        */
         array(const std::array<std::size_t, Rank>& params)
         :   m_shape(params), 
             m_storage(findSize(params)){
@@ -31,6 +131,24 @@ namespace npp{
                 computeStride();
         }
 
+        /*
+            Constructs an array from a nested initializer_list.
+
+            IMPORTANT: R > 1 is required to avoid constructor ambiguity.
+            Without that Rank=1 would also accept initializer_list<T>
+            and could create ambiguity with other constructors, for example:
+
+                npp::array<int,1> a({50});
+        */
+        
+        template<std::size_t R = Rank>
+        requires (R > 1)
+        array(typename nested_initializer<T, R>::type init){   
+            flatten<T, R>(init, m_storage);
+            getShape<T, R, R>(init, m_shape);
+            computeStride();
+        }
+
         array(array&& other) noexcept
         :   m_shape(std::move(other.m_shape)),
             m_storage(std::move(other.m_storage)),
@@ -40,6 +158,7 @@ namespace npp{
         :   m_shape(other.m_shape),
             m_storage(other.m_storage),
             m_stride(other.m_stride){}
+
         /***********************************************************************************/
         /***************************** Operators overloading *******************************/
         /***********************************************************************************/
@@ -297,6 +416,15 @@ namespace npp{
         std::vector<T> m_storage;
         std::array<std::size_t, Rank> m_stride;
 
+
+        /*
+            Computes row-major strides.
+            Example: 
+                shape {2,3,4} ---> stride = {12,4,1}
+                
+                where 12 is 3*4, 4 is 4*1, etc
+        */
+
         void computeStride(){
             std::size_t mul = 1; 
             for (std::size_t i = Rank; i-- >0;){
@@ -304,6 +432,16 @@ namespace npp{
                 mul *= m_shape[i]; 
             }
         }
+
+
+
+        /*
+            Validates indices and converts them to unsigned positions.
+            
+            Supports negative indexing like Numpy 
+            Example:
+                -1 refers to the last element of a dimesion
+        */
 
         template<typename... Index>
         std::array<std::size_t, Rank> checkIndices(Index... indices) const{
@@ -315,12 +453,11 @@ namespace npp{
             std::array<std::size_t, Rank> result{};
         
             for (std::size_t i = 0; i < Rank; ++i){
-                //negative index like numpy
                 if constexpr (std::is_signed_v<std::common_type_t<Index...>>){
                     if (idx[i] < 0){
                         idx[i] += static_cast<long long>(m_shape[i]);
                     }
-                    //check out of bounds
+
                     if (idx[i] < 0 || idx[i] >= static_cast<std::common_type_t<Index...>>(m_shape[i])){
                         throw std::out_of_range("npp::array error: index out of bounds");
                     }
@@ -338,6 +475,13 @@ namespace npp{
             return result;
         }
 
+        /*
+            Finds size for m_storage
+            IMPORTANT: 
+                We need to check for overflow befor multiplication to prevent
+                size_t wrap around
+        */
+
         static std::size_t findSize(const std::array<std::size_t, Rank>& params){
             std::size_t tot = 1;
             for (std::size_t i = 0; i < Rank; ++i){
@@ -349,7 +493,13 @@ namespace npp{
             return tot;
         }
 
-        
+        /*
+            Converts N-dimensional coordinates into a linear index
+            Example:
+                shape  {2,3,4} 
+                index  (1,2,3)  
+                linear index = 1*12 + 2*4 + 3*1
+        */
 
         std::size_t calculateIndex(const std::array<std::size_t, Rank>& indices) const noexcept{
             std::size_t idx = 0;
@@ -375,8 +525,8 @@ namespace npp{
     array<T, Rank> operator+(Scalar value, const array<T, Rank>& arr){
         array<T, Rank> res(arr);
     
-        for (std::size_t i = 0; i < res.size(); ++i){
-            res.data()[i] += value;
+        for(auto& x : res){
+            x += value;
         }
         return res;
     }
@@ -387,8 +537,8 @@ namespace npp{
     array<T, Rank> operator-(Scalar value, const array<T, Rank>& arr){
         array<T, Rank> res(arr);
     
-        for (std::size_t i = 0; i < res.size(); ++i){
-            res.data()[i] = value - arr.data()[i];
+        for(auto& x : res){
+            x = value - x;
         }
         return res;
     }
@@ -399,8 +549,8 @@ namespace npp{
     array<T, Rank> operator*(Scalar value, const array<T, Rank>& arr){
         array<T, Rank> res(arr);
     
-        for (std::size_t i = 0; i < res.size(); ++i){
-            res.data()[i] = value * arr.data()[i];
+        for(auto& x : res){
+            x *= value;
         }
         return res;
     }
@@ -410,11 +560,9 @@ namespace npp{
     [[nodiscard]]
     array<T, Rank> operator/(Scalar value, const array<T, Rank>& arr){
         array<T, Rank> res(arr);
-    
-        for (std::size_t i = 0; i < res.size(); ++i){
-            res.data()[i] = value / res.data()[i];
+        for(auto& x : res){
+            x = value / x;
         }
-    
         return res;
     }
 } //namespace npp

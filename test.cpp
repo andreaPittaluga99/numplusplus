@@ -663,6 +663,60 @@ void testEquality(){
 }
 
 
+void testInitializerConstructor(){
+
+    npp::array<int,2> a{
+        {
+            {1,2,3},
+            {4,5,6}
+        }
+    };
+
+
+    assert(a.rank() == 2);
+    assert(a.size() == 6);
+
+    auto s = a.shape();
+
+    assert(s[0] == 2);
+    assert(s[1] == 3);
+
+
+    assert(a(0,0) == 1);
+    assert(a(0,1) == 2);
+    assert(a(0,2) == 3);
+
+    assert(a(1,0) == 4);
+    assert(a(1,1) == 5);
+    assert(a(1,2) == 6);
+
+
+    std::cout << "[OK] initializer constructor\n";
+}
+
+
+void testInitializerConstructorFail(){
+
+    bool thrown = false;
+
+    try{
+        npp::array<int,2> a{
+            {
+                {1,2,3},
+                {4,5}
+            }
+        };
+    }
+    catch(const std::invalid_argument&){
+        thrown = true;
+    }
+    assert(thrown);
+
+    std::cout << "[OK] initializer constructor fail\n";
+}
+
+
+
 int main(){
     testConstruction();
     testValueConstructor();
@@ -697,6 +751,8 @@ int main(){
     testArithmeticShapeMismatch();
     testSizeOverflow();
     testEquality();
+    testInitializerConstructor();
+    testInitializerConstructorFail();
 
     std::cout << "\nALL TESTS PASSED\n";
 }
