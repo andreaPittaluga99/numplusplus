@@ -18,6 +18,16 @@ void testConstruction(){
     std::cout << "[OK] construction\n";
 }
 
+void testDouble(){
+
+    npp::array<double,2> a({2,2},3.14);
+
+    for(auto x:a){
+        assert(x==3.14);
+    }
+    std::cout << "[OK] double\n";
+}
+
 void testValueConstructor(){
     npp::array<int, 2> a({3,4}, 42);
 
@@ -104,6 +114,7 @@ void testZeroDimension2d(){
 
     assert(a.size() == 0);
     assert(a.begin() == a.end());
+    assert(a.data()==nullptr);
     assert(a.shape()[0] == 0);
     assert(a.shape()[1] == 5);
 
@@ -391,6 +402,7 @@ void testMoveConstructor(){
 
     npp::array<int,2> b = std::move(a);
 
+    assert(a.size()==0);
     assert(b.shape()[0] == 3);
     assert(b.shape()[1] == 3);
     assert(b.size() == 9);
@@ -603,10 +615,23 @@ void testReverseScalarArithmetic(){
         assert(x == 10);
     }
 
-
     std::cout << "[OK] reverse scalar arithmetic\n";
 }
 
+void testSizeOverflow(){
+    bool thrown = false;
+
+    try{
+        npp::array<int,2> a({std::numeric_limits<std::size_t>::max(),2});
+    }
+    catch(const std::overflow_error&){
+        thrown = true;
+    }
+
+    assert(thrown);
+
+    std::cout << "[OK] size overflow\n";
+}
 
 void testArithmeticShapeMismatch(){
     npp::array<int,1> a({3}, 1);
@@ -626,10 +651,22 @@ void testArithmeticShapeMismatch(){
     std::cout << "[OK] arithmetic shape mismatch\n";
 }
 
+void testEquality(){
+
+    npp::array<int,1> a({3},1);
+    npp::array<int,1> b({3},1);
+    npp::array<int,1> c({3},2);
+
+    assert(a==b);
+    assert(a!=c);
+    std::cout << "[OK] equality\n";
+}
+
 
 int main(){
     testConstruction();
     testValueConstructor();
+    testDouble();
     testNegativeIndexing();
     testNegativeIndexOutOfBounds();
     testStride();
@@ -658,7 +695,8 @@ int main(){
     testScalarArithmetic();
     testReverseScalarArithmetic();
     testArithmeticShapeMismatch();
-    
+    testSizeOverflow();
+    testEquality();
 
     std::cout << "\nALL TESTS PASSED\n";
 }
