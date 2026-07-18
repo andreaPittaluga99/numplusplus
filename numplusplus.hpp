@@ -175,6 +175,20 @@ namespace npp{
             return m_storage[calculateIndex(idx)];
         }
 
+
+        // operator[] is an alias for operator() in the Rank == 1 case
+        template<std::size_t R = Rank>
+        requires (R == 1)
+        T& operator[](std::ptrdiff_t i){
+            return (*this)(i);
+        }
+
+        template<std::size_t R = Rank>
+        requires (R == 1)
+        const T& operator[](std::ptrdiff_t i) const{
+            return (*this)(i);
+        }
+
         array& operator= (array&& other) noexcept{
             if(this != &other){
                 m_shape = std::move(other.m_shape);

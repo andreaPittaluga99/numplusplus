@@ -365,7 +365,6 @@ void testCopyConstructor(){
         assert(x == 7);
     }
 
-    // verifica che siano indipendenti
     b(0,0) = 100;
 
     assert(a(0,0) == 7);
@@ -715,6 +714,83 @@ void testInitializerConstructorFail(){
     std::cout << "[OK] initializer constructor fail\n";
 }
 
+void testBracketOperator(){
+    npp::array<int,1> a({5});
+
+    for(std::size_t i = 0; i < a.size(); ++i){
+        a[i] = static_cast<int>(i * 10);
+    }
+
+    assert(a[0] == 0);
+    assert(a[1] == 10);
+    assert(a[2] == 20);
+    assert(a[3] == 30);
+    assert(a[4] == 40);
+
+    std::cout << "[OK] operator[]\n";
+}
+
+
+void testConstBracketOperator(){
+    npp::array<int,1> a({3});
+
+    a[0] = 7;
+    a[1] = 8;
+    a[2] = 9;
+
+    const auto& ca = a;
+
+    assert(ca[0] == 7);
+    assert(ca[1] == 8);
+    assert(ca[2] == 9);
+
+    std::cout << "[OK] const operator[]\n";
+}
+
+
+void testNegativeBracketOperator(){
+    npp::array<int,1> a({5});
+
+    for(std::size_t i = 0; i < a.size(); ++i){
+        a[i] = static_cast<int>(i);
+    }
+
+    assert(a[-1] == 4);
+    assert(a[-2] == 3);
+    assert(a[-5] == 0);
+
+    std::cout << "[OK] negative operator[]\n";
+}
+
+
+void testBracketOutOfBounds(){
+    npp::array<int,1> a({5});
+
+    bool thrown = false;
+
+    try{
+        a[5];
+    }
+    catch(const std::out_of_range&){
+        thrown = true;
+    }
+
+    assert(thrown);
+
+    thrown = false;
+
+    try{
+        a[-6];
+    }
+    catch(const std::out_of_range&){
+        thrown = true;
+    }
+
+    assert(thrown);
+
+    std::cout << "[OK] operator[] out of bounds\n";
+}
+
 
 
 int main(){
@@ -753,6 +829,10 @@ int main(){
     testEquality();
     testInitializerConstructor();
     testInitializerConstructorFail();
+    testBracketOperator();
+    testConstBracketOperator();
+    testNegativeBracketOperator();
+    testBracketOutOfBounds();
 
     std::cout << "\nALL TESTS PASSED\n";
 }
