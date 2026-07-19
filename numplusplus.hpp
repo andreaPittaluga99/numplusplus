@@ -396,6 +396,13 @@ namespace npp{
             computeStride();
         }
 
+        [[nodiscard]]
+        array reshaped(const std::array<std::size_t, Rank>& params) const {
+            array ret(*this);
+            ret.reshape(params);
+            return ret;
+        }
+
         void fill(const T &data){
             std::fill(m_storage.begin(), m_storage.end(), data);
         }

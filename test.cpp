@@ -791,6 +791,75 @@ void testBracketOutOfBounds(){
     std::cout << "[OK] operator[] out of bounds\n";
 }
 
+void testReshaped(){
+    npp::array<int,2> a({2,3});
+
+    int value = 0;
+    for(auto& x : a){
+        x = value++;
+    }
+
+    auto b = a.reshaped({3,2});
+
+    assert(b.shape()[0] == 3);
+    assert(b.shape()[1] == 2);
+
+    assert(b(0,0) == 0);
+    assert(b(0,1) == 1);
+    assert(b(1,0) == 2);
+    assert(b(1,1) == 3);
+    assert(b(2,0) == 4);
+    assert(b(2,1) == 5);
+
+    std::cout << "[OK] reshaped\n";
+}
+
+
+void testReshapedDoesNotModifyOriginal(){
+    npp::array<int,2> a({2,3});
+
+    int value = 0;
+    for(auto& x : a){
+        x = value++;
+    }
+
+    auto b = a.reshaped({3,2});
+
+    (void)b;
+
+    assert(a.shape()[0] == 2);
+    assert(a.shape()[1] == 3);
+
+    assert(a(0,0) == 0);
+    assert(a(0,1) == 1);
+    assert(a(0,2) == 2);
+
+    assert(a(1,0) == 3);
+    assert(a(1,1) == 4);
+    assert(a(1,2) == 5);
+
+    std::cout << "[OK] reshaped leaves original unchanged\n";
+}
+
+
+void testReshapedInvalid(){
+    npp::array<int,2> a({2,3});
+
+    bool thrown = false;
+
+    try{
+        auto b = a.reshaped({4,4});
+        (void)b;
+    }
+    catch(const std::invalid_argument&){
+        thrown = true;
+    }
+
+    assert(thrown);
+
+    std::cout << "[OK] reshaped invalid\n";
+}
+
 
 
 int main(){
@@ -833,6 +902,9 @@ int main(){
     testConstBracketOperator();
     testNegativeBracketOperator();
     testBracketOutOfBounds();
+    testReshaped();
+    testReshapedDoesNotModifyOriginal();
+    testReshapedInvalid();
 
     std::cout << "\nALL TESTS PASSED\n";
 }
