@@ -356,7 +356,7 @@ namespace npp{
             return res;
         }
         
-        /******************************** Reduction operations   ***************************/
+        /******************************** Reduction operations ***************************/
 
         T sum() const {
             T tot = 0;
@@ -376,7 +376,7 @@ namespace npp{
 
         T min() const {
             if(m_storage.empty()){
-                throw std::invalid_argument("min of empty array");
+                throw std::invalid_argument("npp::array error: min of empty array");
             }
 
             return *std::min_element(m_storage.begin(), m_storage.end());
@@ -384,7 +384,7 @@ namespace npp{
 
         T max() const {
             if(m_storage.empty()){
-                throw std::invalid_argument("max of empty array");
+                throw std::invalid_argument("npp::array error: max of empty array");
             }
 
             return *std::max_element(m_storage.begin(), m_storage.end());
@@ -393,13 +393,41 @@ namespace npp{
 
         double mean() const{
             if(m_storage.empty()){
-                throw std::invalid_argument("mean of empty array");
+                throw std::invalid_argument("npp::array error: mean of empty array");
             }
             double tot = 0;
             for(auto& x : m_storage){
                 tot += x;
             }
             return tot/m_storage.size();
+        }
+
+
+        std::size_t argmin_flattened() const {
+            if (m_storage.empty()){
+                throw std::invalid_argument("npp::array error: argmin of empty array");
+            }
+            return std::distance(m_storage.begin(), std::min_element(m_storage.begin(), m_storage.end()));
+        }
+
+        std::size_t argmax_flattened() const {
+            if (m_storage.empty()){
+                throw std::invalid_argument("npp::array error: argmin of empty array");
+            }
+            return std::distance(m_storage.begin(), std::max_element(m_storage.begin(), m_storage.end()));
+        }
+
+        std::array<std::size_t, Rank> unravel_index(std::size_t index) const {
+            std::array<std::size_t, Rank> coords{};
+        
+            auto s = stride();
+        
+            for(std::size_t i = 0; i < Rank; ++i){
+                coords[i] = index / s[i];
+                index %= s[i];
+            }
+        
+            return coords;
         }
         /***********************************************************************************/
         /********************************** Iterators **************************************/
@@ -579,7 +607,6 @@ namespace npp{
                 throw std::invalid_argument("npp::array error: incompatible array shapes");
             }
         }
-
 
     }; //class
 

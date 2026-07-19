@@ -1207,6 +1207,145 @@ void testMeanAfterReshape(){
 
 
 
+void testArgminFlattened(){
+    npp::array<int,2> a({2,3});
+
+    int values[] = {10, 2, 8, 4, 1, 6};
+
+    std::copy(std::begin(values), std::end(values), a.begin());
+
+    assert(a.argmin_flattened() == 4);
+
+    std::cout << "[OK] argmin flattened\n";
+}
+
+
+void testArgmaxFlattened(){
+    npp::array<int,2> a({2,3});
+
+    int values[] = {10, 2, 8, 4, 1, 6};
+
+    std::copy(std::begin(values), std::end(values), a.begin());
+
+    assert(a.argmax_flattened() == 0);
+
+    std::cout << "[OK] argmax flattened\n";
+}
+
+
+void testArgminArgmax1d(){
+    npp::array<int,1> a({5});
+
+    a[0] = -5;
+    a[1] = 10;
+    a[2] = -3;
+    a[3] = 2;
+    a[4] = 1;
+
+    assert(a.argmin_flattened() == 0);
+    assert(a.argmax_flattened() == 1);
+
+    std::cout << "[OK] argmin argmax 1d\n";
+}
+
+
+void testArgminArgmaxNegativeValues(){
+    npp::array<int,1> a({5});
+
+    a[0] = -10;
+    a[1] = -3;
+    a[2] = -20;
+    a[3] = -1;
+    a[4] = -5;
+
+    assert(a.argmin_flattened() == 2);
+    assert(a.argmax_flattened() == 3);
+
+    std::cout << "[OK] argmin argmax negative values\n";
+}
+
+
+void testArgminSingleElement(){
+    npp::array<int,1> a({1},42);
+
+    assert(a.argmin_flattened() == 0);
+    assert(a.argmax_flattened() == 0);
+
+    std::cout << "[OK] argmin argmax single element\n";
+}
+
+
+void testArgminEmpty(){
+    npp::array<int,2> a({0,5});
+
+    bool thrown = false;
+
+    try{
+        a.argmin_flattened();
+    }
+    catch(const std::invalid_argument&){
+        thrown = true;
+    }
+
+    assert(thrown);
+
+    std::cout << "[OK] argmin empty\n";
+}
+
+
+void testArgmaxEmpty(){
+    npp::array<int,2> a({0,5});
+
+    bool thrown = false;
+
+    try{
+        a.argmax_flattened();
+    }
+    catch(const std::invalid_argument&){
+        thrown = true;
+    }
+
+    assert(thrown);
+
+    std::cout << "[OK] argmax empty\n";
+}
+
+
+void testUnravelIndex2d(){
+    npp::array<int,2> a({2,3});
+
+    auto c0 = a.unravel_index(0);
+
+    assert(c0[0] == 0);
+    assert(c0[1] == 0);
+
+
+    auto c4 = a.unravel_index(4);
+
+    assert(c4[0] == 1);
+    assert(c4[1] == 1);
+
+    auto c5 = a.unravel_index(5);
+    assert(c5[0] == 1);
+    assert(c5[1] == 2);
+
+    std::cout << "[OK] unravel index 2d\n";
+}
+
+
+void testUnravelIndex3d(){
+    npp::array<int,3> a({2,3,4});
+
+    auto c = a.unravel_index(23);
+    assert(c[0] == 1);
+    assert(c[1] == 2);
+    assert(c[2] == 3);
+
+    std::cout << "[OK] unravel index 3d\n";
+}
+
+
+
 
 int main(){
     testConstruction();
@@ -1276,6 +1415,15 @@ int main(){
     testMeanSingleElement();
     testMeanDouble();
     testMeanAfterReshape();
+    testArgminFlattened();
+    testArgmaxFlattened();
+    testArgminArgmax1d();
+    testArgminArgmaxNegativeValues();
+    testArgminSingleElement();
+    testArgminEmpty();
+    testArgmaxEmpty();
+    testUnravelIndex2d();
+    testUnravelIndex3d();
 
     std::cout << "\nALL TESTS PASSED\n";
 }
