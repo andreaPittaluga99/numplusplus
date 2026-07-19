@@ -860,6 +860,352 @@ void testReshapedInvalid(){
     std::cout << "[OK] reshaped invalid\n";
 }
 
+void testSum(){
+    npp::array<int,2> a({2,3});
+
+    int value = 1;
+    for(auto& x : a){
+        x = value++;
+    }
+
+    assert(a.sum() == 21);
+
+    std::cout << "[OK] sum\n";
+}
+
+
+void testSumEmpty(){
+    npp::array<int,2> a({0,5});
+
+    assert(a.sum() == 0);
+
+    std::cout << "[OK] sum empty\n";
+}
+
+
+void testSumNegativeValues(){
+    npp::array<int,1> a({5});
+
+    a[0] = -5;
+    a[1] = 10;
+    a[2] = -3;
+    a[3] = 2;
+    a[4] = 1;
+
+    assert(a.sum() == 5);
+
+    std::cout << "[OK] sum negative values\n";
+}
+
+
+void testSumSingleElement(){
+    npp::array<int,1> a({1},42);
+
+    assert(a.sum() == 42);
+
+    std::cout << "[OK] sum single element\n";
+}
+
+
+void testSumDouble(){
+    npp::array<double,2> a({2,2});
+
+    a(0,0) = 0.5;
+    a(0,1) = 1.5;
+    a(1,0) = 2.0;
+    a(1,1) = 4.0;
+
+    assert(a.sum() == 8.0);
+
+    std::cout << "[OK] sum double\n";
+}
+
+
+void testSumAfterReshape(){
+    npp::array<int,2> a({2,3});
+
+    int value = 1;
+    for(auto& x : a){
+        x = value++;
+    }
+
+    auto before = a.sum();
+
+    a.reshape({3,2});
+
+    assert(a.sum() == before);
+
+    std::cout << "[OK] sum after reshape\n";
+}
+
+void testProd(){
+    npp::array<int,2> a({2,3});
+
+    int value = 1;
+    for(auto& x : a){
+        x = value++;
+    }
+
+    assert(a.prod() == 720);
+
+    std::cout << "[OK] prod\n";
+}
+
+
+void testProdEmpty(){
+    npp::array<int,2> a({0,5});
+
+    assert(a.prod() == 1);
+
+    std::cout << "[OK] prod empty\n";
+}
+
+
+void testProdNegativeValues(){
+    npp::array<int,1> a({5});
+
+    a[0] = -2;
+    a[1] = 3;
+    a[2] = -1;
+    a[3] = 4;
+    a[4] = 5;
+
+    assert(a.prod() == 120);
+
+    std::cout << "[OK] prod negative values\n";
+}
+
+
+void testProdSingleElement(){
+    npp::array<int,1> a({1}, 42);
+
+    assert(a.prod() == 42);
+
+    std::cout << "[OK] prod single element\n";
+}
+
+
+void testProdDouble(){
+    npp::array<double,2> a({2,2});
+
+    a(0,0) = 0.5;
+    a(0,1) = 2.0;
+    a(1,0) = 4.0;
+    a(1,1) = 5.0;
+
+    assert(a.prod() == 20.0);
+
+    std::cout << "[OK] prod double\n";
+}
+
+
+void testProdAfterReshape(){
+    npp::array<int,2> a({2,3});
+
+    int value = 1;
+    for(auto& x : a){
+        x = value++;
+    }
+
+    auto before = a.prod();
+
+    a.reshape({3,2});
+
+    assert(a.prod() == before);
+
+    std::cout << "[OK] prod after reshape\n";
+}
+
+
+
+void testMin(){
+    npp::array<int,2> a({2,3});
+
+    int values[] = {5,2,8,1,9,3};
+
+    std::copy(std::begin(values), std::end(values), a.begin());
+
+    assert(a.min() == 1);
+
+    std::cout << "[OK] min\n";
+}
+
+
+void testMax(){
+    npp::array<int,2> a({2,3});
+
+    int values[] = {5,2,8,1,9,3};
+
+    std::copy(std::begin(values), std::end(values), a.begin());
+
+    assert(a.max() == 9);
+
+    std::cout << "[OK] max\n";
+}
+
+
+void testMinNegativeValues(){
+    npp::array<int,1> a({5});
+
+    a[0] = -5;
+    a[1] = 10;
+    a[2] = -3;
+    a[3] = 2;
+    a[4] = 1;
+
+    assert(a.min() == -5);
+
+    std::cout << "[OK] min negative values\n";
+}
+
+
+void testMaxNegativeValues(){
+    npp::array<int,1> a({5});
+
+    a[0] = -5;
+    a[1] = -10;
+    a[2] = -3;
+    a[3] = -2;
+    a[4] = -1;
+
+    assert(a.max() == -1);
+
+    std::cout << "[OK] max negative values\n";
+}
+
+
+void testMinMaxSingleElement(){
+    npp::array<int,1> a({1},42);
+
+    assert(a.min() == 42);
+    assert(a.max() == 42);
+
+    std::cout << "[OK] min max single element\n";
+}
+
+
+void testMinMaxDouble(){
+    npp::array<double,2> a({2,2});
+
+    a(0,0) = 3.5;
+    a(0,1) = -1.2;
+    a(1,0) = 8.0;
+    a(1,1) = 4.7;
+
+    assert(a.min() == -1.2);
+    assert(a.max() == 8.0);
+
+    std::cout << "[OK] min max double\n";
+}
+
+
+void testMinMaxAfterReshape(){
+    npp::array<int,2> a({2,3});
+
+    int values[] = {10,4,7,2,9,1};
+
+    std::copy(std::begin(values), std::end(values), a.begin());
+
+    auto min_before = a.min();
+    auto max_before = a.max();
+
+    a.reshape({3,2});
+
+    assert(a.min() == min_before);
+    assert(a.max() == max_before);
+
+    std::cout << "[OK] min max after reshape\n";
+}
+
+void testMean(){
+    npp::array<int,2> a({2,3});
+
+    int value = 1;
+    for(auto& x : a){
+        x = value++;
+    }
+
+    assert(a.mean() == 3.5);
+
+    std::cout << "[OK] mean\n";
+}
+
+
+void testMeanEmpty(){
+    npp::array<int,2> a({0,5});
+
+    bool thrown = false;
+
+    try{
+        auto x = a.mean();
+        (void)x;
+    }
+    catch(const std::invalid_argument&){
+        thrown = true;
+    }
+
+    assert(thrown);
+
+    std::cout << "[OK] mean empty\n";
+}
+
+
+void testMeanNegativeValues(){
+    npp::array<int,1> a({5});
+
+    a[0] = -5;
+    a[1] = 10;
+    a[2] = -3;
+    a[3] = 2;
+    a[4] = 1;
+
+    assert(a.mean() == 1.0);
+
+    std::cout << "[OK] mean negative values\n";
+}
+
+
+void testMeanSingleElement(){
+    npp::array<int,1> a({1},42);
+
+    assert(a.mean() == 42.0);
+
+    std::cout << "[OK] mean single element\n";
+}
+
+
+void testMeanDouble(){
+    npp::array<double,2> a({2,2});
+
+    a(0,0) = 0.5;
+    a(0,1) = 1.5;
+    a(1,0) = 2.0;
+    a(1,1) = 4.0;
+
+    assert(a.mean() == 2.0);
+
+    std::cout << "[OK] mean double\n";
+}
+
+
+void testMeanAfterReshape(){
+    npp::array<int,2> a({2,3});
+
+    int value = 1;
+    for(auto& x : a){
+        x = value++;
+    }
+
+    auto before = a.mean();
+
+    a.reshape({3,2});
+
+    assert(a.mean() == before);
+
+    std::cout << "[OK] mean after reshape\n";
+}
+
+
 
 
 int main(){
@@ -905,6 +1251,31 @@ int main(){
     testReshaped();
     testReshapedDoesNotModifyOriginal();
     testReshapedInvalid();
+    testSum();
+    testSumEmpty();
+    testSumNegativeValues();
+    testSumSingleElement();
+    testSumDouble();
+    testSumAfterReshape();
+    testProd();
+    testProdEmpty();
+    testProdNegativeValues();
+    testProdSingleElement();
+    testProdDouble();
+    testProdAfterReshape();
+    testMin();
+    testMax();
+    testMinNegativeValues();
+    testMaxNegativeValues();
+    testMinMaxSingleElement();
+    testMinMaxDouble();
+    testMinMaxAfterReshape();
+    testMean();
+    testMeanEmpty();
+    testMeanNegativeValues();
+    testMeanSingleElement();
+    testMeanDouble();
+    testMeanAfterReshape();
 
     std::cout << "\nALL TESTS PASSED\n";
 }

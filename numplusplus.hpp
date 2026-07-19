@@ -356,7 +356,51 @@ namespace npp{
             return res;
         }
         
+        /******************************** Reduction operations   ***************************/
 
+        T sum() const {
+            T tot = 0;
+            for(auto& x : m_storage){
+                tot += x;
+            }
+            return tot;
+        }
+
+        T prod() const {
+            T tot = 1;
+            for(auto& x : m_storage){
+                tot *= x;
+            }
+            return tot;
+        }
+
+        T min() const {
+            if(m_storage.empty()){
+                throw std::invalid_argument("min of empty array");
+            }
+
+            return *std::min_element(m_storage.begin(), m_storage.end());
+        }
+
+        T max() const {
+            if(m_storage.empty()){
+                throw std::invalid_argument("max of empty array");
+            }
+
+            return *std::max_element(m_storage.begin(), m_storage.end());
+        }
+
+
+        double mean() const{
+            if(m_storage.empty()){
+                throw std::invalid_argument("mean of empty array");
+            }
+            double tot = 0;
+            for(auto& x : m_storage){
+                tot += x;
+            }
+            return tot/m_storage.size();
+        }
         /***********************************************************************************/
         /********************************** Iterators **************************************/
         /***********************************************************************************/
