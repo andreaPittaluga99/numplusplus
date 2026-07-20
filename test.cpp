@@ -60,7 +60,7 @@ void testNegativeIndexOutOfBounds(){
     bool thrown = false;
 
     try{
-        a(-3,0);
+        a.at(-3,0);
     }
     catch(const std::out_of_range&){
         thrown = true;
@@ -71,7 +71,7 @@ void testNegativeIndexOutOfBounds(){
     thrown = false;
 
     try{
-        a(0,-4);
+        a.at(0,-4);
     }
     catch(const std::out_of_range&){
         thrown = true;
@@ -205,13 +205,21 @@ void testIndexing(){
     std::cout << "[OK] indexing\n";
 }
 
+void testIndexingAt(){
+    npp::array<int, 3> a({2,3,4});
+    a.at(1,2,3) = 999;
+    assert(a.at(1,2,3) == 999);
+
+    std::cout << "[OK] indexing at()\n";
+}
+
 
 void testBounds(){
     npp::array<int, 2> a({3,4});
     bool thrown = false;
 
     try{
-        a(3,0);
+        a.at(3,0);
     }
     catch(const std::out_of_range&){
         thrown = true;
@@ -221,7 +229,7 @@ void testBounds(){
 
     thrown = false;
     try{
-        a(0,4);
+        a.at(0,4);
     }
     catch(const std::out_of_range&){
         thrown = true;
@@ -762,34 +770,6 @@ void testNegativeBracketOperator(){
     std::cout << "[OK] negative operator[]\n";
 }
 
-
-void testBracketOutOfBounds(){
-    npp::array<int,1> a({5});
-
-    bool thrown = false;
-
-    try{
-        a[5];
-    }
-    catch(const std::out_of_range&){
-        thrown = true;
-    }
-
-    assert(thrown);
-
-    thrown = false;
-
-    try{
-        a[-6];
-    }
-    catch(const std::out_of_range&){
-        thrown = true;
-    }
-
-    assert(thrown);
-
-    std::cout << "[OK] operator[] out of bounds\n";
-}
 
 void testReshaped(){
     npp::array<int,2> a({2,3});
@@ -1386,7 +1366,6 @@ int main(){
     testBracketOperator();
     testConstBracketOperator();
     testNegativeBracketOperator();
-    testBracketOutOfBounds();
     testReshaped();
     testReshapedDoesNotModifyOriginal();
     testReshapedInvalid();

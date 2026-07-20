@@ -165,14 +165,12 @@ namespace npp{
         
         template<typename... Index>
         const T& operator()(Index... indices) const {
-            auto idx = checkIndices(indices...);
-            return m_storage[calculateIndex(idx)];
+            return m_storage[calculateIndex(normalizeIndices(indices...))];
         }
 
         template<typename... Index>
         T& operator()(Index... indices){
-            auto idx = checkIndices(indices...);
-            return m_storage[calculateIndex(idx)];
+            return m_storage[calculateIndex(normalizeIndices(indices...))];
         }
 
 
@@ -455,6 +453,19 @@ namespace npp{
         /********************************** functions **************************************/
         /***********************************************************************************/
 
+        template<typename... Index>
+        const T& at(Index... indices) const {
+            auto idx = checkIndices(indices...);
+            return m_storage[calculateIndex(idx)];
+        }
+
+        template<typename... Index>
+        T& at(Index... indices){
+            auto idx = checkIndices(indices...);
+            return m_storage[calculateIndex(idx)];
+        }
+
+
         void reshape(const std::array<std::size_t, Rank>& params){
             if (params == m_shape){
                 return;
@@ -562,6 +573,29 @@ namespace npp{
                     }
                 }
                 
+                result[i] = static_cast<std::size_t>(idx[i]);
+            }
+        
+            return result;
+        }
+
+        template<typename... Index>
+        std::array<std::size_t, Rank> normalizeIndices(Index... indices) const {
+            static_assert(sizeof...(Index) == Rank);
+            static_assert((std::is_integral_v<Index> && ...));
+        
+            using IndexType = std::common_type_t<Index...>;
+        
+            std::array<IndexType, Rank> idx{indices...};
+            std::array<std::size_t, Rank> result{};
+        
+            for (std::size_t i = 0; i < Rank; ++i) {
+                if constexpr (std::is_signed_v<IndexType>) {
+                    if (idx[i] < 0){
+                        idx[i] += static_cast<IndexType>(m_shape[i]);
+                    }
+                }
+            
                 result[i] = static_cast<std::size_t>(idx[i]);
             }
         
