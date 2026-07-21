@@ -1510,6 +1510,21 @@ void testMathLog(){
     std::cout << "[OK] log\n";
 }
 
+void testMathLog10(){
+    npp::array<double,1> a({4});
+    a[0] = 1.0;
+    a[1] = 10.0;
+    a[2] = 100.0;
+    a[3] = 1000.0;
+    auto b = a.log10();
+    assert(std::abs(b[0] - 0.0) < 1e-12);
+    assert(std::abs(b[1] - 1.0) < 1e-12);
+    assert(std::abs(b[2] - 2.0) < 1e-12);
+    assert(std::abs(b[3] - 3.0) < 1e-12);
+
+    std::cout << "[OK] log10\n";
+}
+
 int main(){
     testConstruction();
     testValueConstructor();
@@ -1597,6 +1612,7 @@ int main(){
     testMathSqrt();
     testMathExp();
     testMathLog();
+    testMathLog10();
 
     std::cout << "\nALL TESTS PASSED\n";
 }
