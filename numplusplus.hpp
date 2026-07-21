@@ -507,6 +507,14 @@ namespace npp{
             return res;
         }
 
+        array tan() const {
+            array res (*this);
+            for(auto& x : res.m_storage){
+                x = std::tan(x);
+            }
+            return res;
+        }
+
 
         /***********************************************************************************/
         /********************************** Iterators **************************************/

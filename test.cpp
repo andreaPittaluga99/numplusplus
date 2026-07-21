@@ -1557,6 +1557,24 @@ void testMathCos(){
     std::cout << "[OK] cos\n";
 }
 
+void testMathTan(){
+    npp::array<double,1> a({4});
+    constexpr double pi = 3.14159265358979323846;
+
+    a[0] = 0.0;
+    a[1] = pi / 4.0;
+    a[2] = -pi / 4.0;
+    a[3] = pi;
+
+    auto b = a.tan();
+    assert(std::abs(b[0] - 0.0) < 1e-12);
+    assert(std::abs(b[1] - 1.0) < 1e-12);
+    assert(std::abs(b[2] + 1.0) < 1e-12);
+    assert(std::abs(b[3] - 0.0) < 1e-12);
+
+    std::cout << "[OK] tan\n";
+}
+
 int main(){
     testConstruction();
     testValueConstructor();
@@ -1647,6 +1665,7 @@ int main(){
     testMathLog10();
     testMathSin();
     testMathCos();
+    testMathTan();
 
     std::cout << "\nALL TESTS PASSED\n";
 }
