@@ -1453,6 +1453,24 @@ void testMathAbs(){
     std::cout << "[OK] abs\n";
 }
 
+void testMathSqrt(){
+    npp::array<double,1> a({4});
+
+    a[0] = 0.0;
+    a[1] = 1.0;
+    a[2] = 4.0;
+    a[3] = 9.0;
+
+    auto b = a.sqrt();
+
+    assert(b[0] == 0.0);
+    assert(b[1] == 1.0);
+    assert(b[2] == 2.0);
+    assert(b[3] == 3.0);
+
+    std::cout << "[OK] sqrt\n";
+}
+
 int main(){
     testConstruction();
     testValueConstructor();
@@ -1537,6 +1555,7 @@ int main(){
     testArrayConstructorWrongSize();
     testArrayConstructorEmpty();
     testMathAbs();
+    testMathSqrt();
 
     std::cout << "\nALL TESTS PASSED\n";
 }

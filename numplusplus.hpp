@@ -9,6 +9,7 @@
 #include <limits>
 #include <utility>
 #include <initializer_list>
+#include <cmath>
 
 
 /*
@@ -456,6 +457,14 @@ namespace npp{
                 x = std::abs(x);
             }
             return res;
+        }
+
+        array sqrt() const {
+            array res(*this);
+            for(auto& x : res.m_storage){
+                x = std::sqrt(x);
+            }
+            return res; 
         }
 
 
