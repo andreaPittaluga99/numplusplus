@@ -491,6 +491,14 @@ namespace npp{
             return res;
         }
 
+        array sin() const {
+            array res (*this);
+            for(auto& x : res.m_storage){
+                x = std::sin(x);
+            }
+            return res;
+        }
+
 
         /***********************************************************************************/
         /********************************** Iterators **************************************/

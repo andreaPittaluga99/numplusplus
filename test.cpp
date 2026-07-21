@@ -1524,6 +1524,22 @@ void testMathLog10(){
 
     std::cout << "[OK] log10\n";
 }
+void testMathSin(){
+    npp::array<double,1> a({4});
+    constexpr double pi = 3.14159265358979323846;
+    a[0] = 0.0;
+    a[1] = pi / 2.0;
+    a[2] = pi;
+    a[3] = -pi / 2.0;
+
+    auto b = a.sin();
+    assert(std::abs(b[0] - 0.0) < 1e-12);
+    assert(std::abs(b[1] - 1.0) < 1e-12);
+    assert(std::abs(b[2] - 0.0) < 1e-12);
+    assert(std::abs(b[3] + 1.0) < 1e-12);
+
+    std::cout << "[OK] sin\n";
+}
 
 int main(){
     testConstruction();
@@ -1613,6 +1629,7 @@ int main(){
     testMathExp();
     testMathLog();
     testMathLog10();
+    testMathSin();
 
     std::cout << "\nALL TESTS PASSED\n";
 }
