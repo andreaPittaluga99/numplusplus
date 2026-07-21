@@ -1491,6 +1491,25 @@ void testMathExp(){
     std::cout << "[OK] exp\n";
 }
 
+void testMathLog(){
+    npp::array<double,1> a({4});
+
+    a[0] = 1.0;
+    a[1] = 2.0;
+    a[2] = 10.0;
+    a[3] = std::exp(1.0);
+
+    auto b = a.log();
+
+    assert(std::abs(b[0] - 0.0) < 1e-12);
+    assert(std::abs(b[1] - std::log(2.0)) < 1e-12);
+    assert(std::abs(b[2] - std::log(10.0)) < 1e-12);
+    assert(std::abs(b[3] - 1.0) < 1e-12);
+    assert(a[3] == std::exp(1.0));
+
+    std::cout << "[OK] log\n";
+}
+
 int main(){
     testConstruction();
     testValueConstructor();
@@ -1577,6 +1596,7 @@ int main(){
     testMathAbs();
     testMathSqrt();
     testMathExp();
+    testMathLog();
 
     std::cout << "\nALL TESTS PASSED\n";
 }

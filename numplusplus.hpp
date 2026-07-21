@@ -475,6 +475,14 @@ namespace npp{
             return res;
         }
 
+        array log() const {
+            array res (*this);
+            for(auto& x : res.m_storage){
+                x = std::log(x);
+            }
+            return res;
+        }
+
 
         /***********************************************************************************/
         /********************************** Iterators **************************************/
