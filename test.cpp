@@ -1471,6 +1471,26 @@ void testMathSqrt(){
     std::cout << "[OK] sqrt\n";
 }
 
+void testMathExp(){
+    npp::array<double,1> a({4});
+
+    a[0] = 0.0;
+    a[1] = 1.0;
+    a[2] = 2.0;
+    a[3] = -1.0;
+
+    auto b = a.exp();
+
+    assert(std::abs(b[0] - 1.0) < 1e-12);
+    assert(std::abs(b[1] - std::exp(1.0)) < 1e-12);
+    assert(std::abs(b[2] - std::exp(2.0)) < 1e-12);
+    assert(std::abs(b[3] - std::exp(-1.0)) < 1e-12);
+
+    assert(a[2] == 2.0);
+
+    std::cout << "[OK] exp\n";
+}
+
 int main(){
     testConstruction();
     testValueConstructor();
@@ -1556,6 +1576,7 @@ int main(){
     testArrayConstructorEmpty();
     testMathAbs();
     testMathSqrt();
+    testMathExp();
 
     std::cout << "\nALL TESTS PASSED\n";
 }

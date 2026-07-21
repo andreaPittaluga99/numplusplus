@@ -467,6 +467,14 @@ namespace npp{
             return res; 
         }
 
+        array exp() const {
+            array res(*this);
+            for(auto& x : res.m_storage){
+                x = std::exp(x);
+            }
+            return res;
+        }
+
 
         /***********************************************************************************/
         /********************************** Iterators **************************************/
