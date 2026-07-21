@@ -1540,6 +1540,22 @@ void testMathSin(){
 
     std::cout << "[OK] sin\n";
 }
+void testMathCos(){
+    npp::array<double,1> a({4});
+    constexpr double pi = 3.14159265358979323846;
+    a[0] = 0.0;
+    a[1] = pi / 2.0;
+    a[2] = pi;
+    a[3] = -pi / 2.0;
+
+    auto b = a.cos();
+    assert(std::abs(b[0] - 1.0) < 1e-12);
+    assert(std::abs(b[1] - 0.0) < 1e-12);
+    assert(std::abs(b[2] + 1.0) < 1e-12);
+    assert(std::abs(b[3] - 0.0) < 1e-12);
+
+    std::cout << "[OK] cos\n";
+}
 
 int main(){
     testConstruction();
@@ -1630,6 +1646,7 @@ int main(){
     testMathLog();
     testMathLog10();
     testMathSin();
+    testMathCos();
 
     std::cout << "\nALL TESTS PASSED\n";
 }

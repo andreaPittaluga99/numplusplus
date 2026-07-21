@@ -499,6 +499,14 @@ namespace npp{
             return res;
         }
 
+        array cos() const {
+            array res (*this);
+            for(auto& x : res.m_storage){
+                x = std::cos(x);
+            }
+            return res;
+        }
+
 
         /***********************************************************************************/
         /********************************** Iterators **************************************/
