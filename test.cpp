@@ -1432,7 +1432,26 @@ void testArrayConstructorEmpty(){
     std::cout << "[OK] array constructor empty\n";
 }
 
+void testMathAbs(){
+    npp::array<int,1> a({5});
 
+    a[0] = -5;
+    a[1] = 2;
+    a[2] = -3;
+    a[3] = 0;
+    a[4] = 10;
+
+    auto b = a.abs();
+
+    assert(b[0] == 5);
+    assert(b[1] == 2);
+    assert(b[2] == 3);
+    assert(b[3] == 0);
+    assert(b[4] == 10);
+    assert(a[0] == -5);
+
+    std::cout << "[OK] abs\n";
+}
 
 int main(){
     testConstruction();
@@ -1517,6 +1536,7 @@ int main(){
     testArrayConstructor();
     testArrayConstructorWrongSize();
     testArrayConstructorEmpty();
+    testMathAbs();
 
     std::cout << "\nALL TESTS PASSED\n";
 }

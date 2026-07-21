@@ -164,7 +164,7 @@ namespace npp{
         :   m_shape(shape), 
             m_storage(std::move(data)){
                 if(m_storage.size() != findSize(shape)){
-                            throw std::invalid_argument("npp::array error: incompatible data size");
+                    throw std::invalid_argument("npp::array error: incompatible data size");
                 }
                 computeStride();
         }
@@ -174,7 +174,7 @@ namespace npp{
         :   m_shape(shape), 
             m_storage(data.begin(), data.end()){
                 if (N != findSize(shape)){
-                            throw std::invalid_argument("npp::array error: incompatible data size");
+                    throw std::invalid_argument("npp::array error: incompatible data size");
                 }
                 computeStride();
         }
@@ -447,6 +447,18 @@ namespace npp{
         
             return coords;
         }
+
+        /******************************** Mathematical functions ***************************/
+
+        array abs() const {
+            array res(*this);
+            for(auto& x : res.m_storage){
+                x = std::abs(x);
+            }
+            return res;
+        }
+
+
         /***********************************************************************************/
         /********************************** Iterators **************************************/
         /***********************************************************************************/
