@@ -159,6 +159,26 @@ namespace npp{
             m_storage(other.m_storage),
             m_stride(other.m_stride){}
 
+
+        array(const std::array<size_t,Rank>& shape, const std::vector<T>& data)
+        :   m_shape(shape), 
+            m_storage(std::move(data)){
+                if(m_storage.size() != findSize(shape)){
+                            throw std::invalid_argument("npp::array error: incompatible data size");
+                }
+                computeStride();
+        }
+
+        template<std::size_t N>
+        array(const std::array<std::size_t, Rank>& shape, const std::array<T, N>& data)
+        :   m_shape(shape), 
+            m_storage(data.begin(), data.end()){
+                if (N != findSize(shape)){
+                            throw std::invalid_argument("npp::array error: incompatible data size");
+                }
+                computeStride();
+        }
+
         /***********************************************************************************/
         /***************************** Operators overloading *******************************/
         /***********************************************************************************/

@@ -1325,6 +1325,113 @@ void testUnravelIndex3d(){
 }
 
 
+void testVectorConstructor(){
+    std::vector<int> v = {1,2,3,4,5,6};
+
+    npp::array<int,2> a({2,3}, v);
+
+    assert(a.shape()[0] == 2);
+    assert(a.shape()[1] == 3);
+    assert(a.size() == 6);
+
+    for(std::size_t i = 0; i < v.size(); ++i){
+        assert(a.data()[i] == v[i]);
+    }
+
+    assert(v.size() == 6);
+
+    std::cout << "[OK] vector constructor\n";
+}
+
+void testVectorConstructorMove(){
+    std::vector<int> v = {10,20,30,40};
+
+    npp::array<int,2> a({2,2}, std::move(v));
+
+    assert(a.size() == 4);
+
+    assert(a(0,0) == 10);
+    assert(a(0,1) == 20);
+    assert(a(1,0) == 30);
+    assert(a(1,1) == 40);
+
+    std::cout << "[OK] vector move constructor\n";
+}
+
+void testVectorConstructorWrongSize(){
+    bool thrown = false;
+
+    try{
+        std::vector<int> v = {1,2,3};
+
+        npp::array<int,2> a({2,2}, v);
+    }
+    catch(const std::invalid_argument&){
+        thrown = true;
+    }
+
+    assert(thrown);
+
+    std::cout << "[OK] vector constructor wrong size\n";
+}
+
+void testVectorConstructorEmpty(){
+    std::vector<int> v;
+
+    npp::array<int,2> a({0,5}, v);
+
+    assert(a.empty());
+    assert(a.size() == 0);
+    assert(a.begin() == a.end());
+
+    std::cout << "[OK] vector constructor empty\n";
+}
+
+void testArrayConstructor(){
+    std::array<int,6> data = {1,2,3,4,5,6};
+
+    npp::array<int,2> a({2,3}, data);
+
+    assert(a.shape()[0] == 2);
+    assert(a.shape()[1] == 3);
+    assert(a.size() == 6);
+
+    for(std::size_t i = 0; i < data.size(); ++i){
+        assert(a.data()[i] == data[i]);
+    }
+
+    std::cout << "[OK] array constructor\n";
+}
+
+void testArrayConstructorWrongSize(){
+    bool thrown = false;
+
+    try{
+        std::array<int,5> data = {1,2,3,4,5};
+
+        npp::array<int,2> a({2,3}, data);
+    }
+    catch(const std::invalid_argument&){
+        thrown = true;
+    }
+
+    assert(thrown);
+
+    std::cout << "[OK] array constructor wrong size\n";
+}
+
+void testArrayConstructorEmpty(){
+    std::array<int,0> data{};
+
+    npp::array<int,2> a({0,5}, data);
+
+    assert(a.empty());
+    assert(a.size() == 0);
+    assert(a.begin() == a.end());
+
+    std::cout << "[OK] array constructor empty\n";
+}
+
 
 
 int main(){
@@ -1403,6 +1510,13 @@ int main(){
     testArgmaxEmpty();
     testUnravelIndex2d();
     testUnravelIndex3d();
+    testVectorConstructor();
+    testVectorConstructorMove();
+    testVectorConstructorWrongSize();
+    testVectorConstructorEmpty();
+    testArrayConstructor();
+    testArrayConstructorWrongSize();
+    testArrayConstructorEmpty();
 
     std::cout << "\nALL TESTS PASSED\n";
 }
