@@ -1702,6 +1702,28 @@ void testScalarEqual(){
     std::cout << "[OK] scalar ==\n";
 }
 
+void testScalarNotEqual(){
+    npp::array<int,1> a({5});
+
+    a[0] = 1;
+    a[1] = 5;
+    a[2] = 6;
+    a[3] = 5;
+    a[4] = 10;
+
+    auto b = a != 5;
+
+    static_assert(std::is_same_v<decltype(b), npp::array<bool,1>>);
+
+    assert(b[0] == true);
+    assert(b[1] == false);
+    assert(b[2] == true);
+    assert(b[3] == false);
+    assert(b[4] == true);
+
+    std::cout << "[OK] scalar !=\n";
+}
+
 
 
 int main(){
@@ -1801,6 +1823,7 @@ int main(){
     testScalarGreaterEqual();
     testScalarLessEqual();
     testScalarEqual();
+    testScalarNotEqual();
 
 
     std::cout << "\nALL TESTS PASSED\n";

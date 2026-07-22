@@ -193,7 +193,7 @@ namespace npp{
 
         /*
             Constructs an array from an existing storage vector.
-            
+
             The input type is storage_type instead of std::vector<T>
             because bool arrays internally use std::vector<uint8_t>
             instead of std::vector<bool>.
@@ -468,6 +468,12 @@ namespace npp{
         requires (std::is_arithmetic_v<Scalar> && !std::is_same_v<T,bool>)
         array<bool, Rank> operator==(Scalar value) const {
             return compare(value, std::equal_to<>{});
+        }
+
+        template<typename Scalar>
+        requires (std::is_arithmetic_v<Scalar> && !std::is_same_v<T,bool>)
+        array<bool, Rank> operator!=(Scalar value) const {
+            return compare(value, std::not_equal_to<>{});
         }
         
         /******************************** Reduction operations ***************************/
