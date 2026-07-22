@@ -288,12 +288,26 @@ namespace npp{
 
         template<typename U = T>
         requires (!std::is_same_v<U,bool>)
-        array& operator+= (const array& other){
-            checkShape(other);
-            for (std::size_t i = 0; i < m_storage.size(); ++i){
-                m_storage[i] += other.m_storage[i];
-            }
-            return *this;
+        array& operator+=(const array& other) {
+            return elementwise_assign(other, std::plus<>{});
+        }
+
+        template<typename U = T>
+        requires (!std::is_same_v<U,bool>)
+        array& operator-=(const array& other) {
+            return elementwise_assign(other, std::minus<>{});
+        }
+
+        template<typename U = T>
+        requires (!std::is_same_v<U,bool>)
+        array& operator*=(const array& other) {
+            return elementwise_assign(other, std::multiplies<>{});
+        }
+
+        template<typename U = T>
+        requires (!std::is_same_v<U,bool>)
+        array& operator/=(const array& other) {
+            return elementwise_assign(other, std::divides<>{});
         }
 
         template<typename U = T>
@@ -305,15 +319,6 @@ namespace npp{
             return res; 
         }
 
-        template<typename U = T>
-        requires (!std::is_same_v<U,bool>)
-        array& operator-= (const array& other){
-            checkShape(other);
-            for (std::size_t i = 0; i < m_storage.size(); ++i){
-                m_storage[i] -= other.m_storage[i];
-            }
-            return *this;
-        }
 
         template<typename U = T>
         requires (!std::is_same_v<U,bool>)
@@ -322,16 +327,6 @@ namespace npp{
             array res(*this);
             res -= other;
             return res; 
-        }
-
-        template<typename U = T>
-        requires (!std::is_same_v<U,bool>)
-        array& operator*= (const array& other){
-            checkShape(other);
-            for (std::size_t i = 0; i < m_storage.size(); ++i){
-                m_storage[i] *= other.m_storage[i];
-            }
-            return *this;
         }
 
         template<typename U = T>
@@ -345,16 +340,6 @@ namespace npp{
 
         template<typename U = T>
         requires (!std::is_same_v<U,bool>)
-        array& operator/= (const array& other){
-            checkShape(other);
-            for (std::size_t i = 0; i < m_storage.size(); ++i){
-                m_storage[i] /= other.m_storage[i];
-            }
-            return *this;
-        }
-
-        template<typename U = T>
-        requires (!std::is_same_v<U,bool>)
         [[nodiscard]]
         array operator/ (const array& other) const {
             array res(*this);
@@ -363,17 +348,30 @@ namespace npp{
         }
 
 
-        /*********************************** Scalar operators ******************************/
+        /*********************************** Scalar operators ******************************/        
+        template<typename Scalar>
+        requires (std::is_arithmetic_v<Scalar> && !std::is_same_v<T,bool>)
+        array& operator+=(Scalar value){
+            return scalar_assign(value, std::plus<>{});
+        }
 
         template<typename Scalar>
         requires (std::is_arithmetic_v<Scalar> && !std::is_same_v<T,bool>)
-        array& operator+= (Scalar value){
-            for(auto& x : m_storage){
-                x += value;
-            }
-            return *this;
+        array& operator-=(Scalar value){
+            return scalar_assign(value, std::minus<>{});
         }
 
+        template<typename Scalar>
+        requires (std::is_arithmetic_v<Scalar> && !std::is_same_v<T,bool>)
+        array& operator*=(Scalar value){
+            return scalar_assign(value, std::multiplies<>{});
+        }
+
+        template<typename Scalar>
+        requires (std::is_arithmetic_v<Scalar> && !std::is_same_v<T,bool>)
+        array& operator/=(Scalar value){
+            return scalar_assign(value, std::divides<>{});
+        }
 
         template<typename Scalar>
         requires (std::is_arithmetic_v<Scalar> && !std::is_same_v<T,bool>)
@@ -383,16 +381,6 @@ namespace npp{
             res += value;
             return res;
         }
-        
-        template<typename Scalar>
-        requires (std::is_arithmetic_v<Scalar> && !std::is_same_v<T,bool>)
-        array& operator-= (Scalar value){
-            for(auto& x : m_storage){
-                x -= value;
-            }
-            return *this;
-        }
-
 
         template<typename Scalar>
         requires (std::is_arithmetic_v<Scalar> && !std::is_same_v<T,bool>)
@@ -405,31 +393,12 @@ namespace npp{
         
         template<typename Scalar>
         requires (std::is_arithmetic_v<Scalar> && !std::is_same_v<T,bool>)
-        array& operator*= (Scalar value){
-            for(auto& x : m_storage){
-                x *= value;
-            }
-            return *this;
-        }
-
-        template<typename Scalar>
-        requires (std::is_arithmetic_v<Scalar> && !std::is_same_v<T,bool>)
         [[nodiscard]]
         array operator* (Scalar value) const{
             array res(*this);
             res *= value;
             return res;
         }
-        
-        template<typename Scalar>
-        requires (std::is_arithmetic_v<Scalar> && !std::is_same_v<T,bool>)
-        array& operator/= (Scalar value){
-            for(auto& x : m_storage){
-                x /= value;
-            }
-            return *this;
-        }
-
 
         template<typename Scalar>
         requires (std::is_arithmetic_v<Scalar> && !std::is_same_v<T,bool>)
@@ -553,69 +522,36 @@ namespace npp{
         /******************************** Mathematical functions ***************************/
 
         array abs() const {
-            array res(*this);
-            for(auto& x : res.m_storage){
-                x = std::abs(x);
-            }
-            return res;
+            return unary_transform([](auto x){ return std::abs(x); });
         }
 
         array sqrt() const {
-            array res(*this);
-            for(auto& x : res.m_storage){
-                x = std::sqrt(x);
-            }
-            return res; 
+            return unary_transform([](auto x){ return std::sqrt(x); });
         }
 
         array exp() const {
-            array res(*this);
-            for(auto& x : res.m_storage){
-                x = std::exp(x);
-            }
-            return res;
+            return unary_transform([](auto x){ return std::exp(x); });
         }
 
         array log() const {
-            array res (*this);
-            for(auto& x : res.m_storage){
-                x = std::log(x);
-            }
-            return res;
+            return unary_transform([](auto x){ return std::log(x); });
         }
 
         array log10() const {
-            array res (*this);
-            for(auto& x : res.m_storage){
-                x = std::log10(x);
-            }
-            return res;
+            return unary_transform([](auto x){ return std::log10(x); });
         }
 
         array sin() const {
-            array res (*this);
-            for(auto& x : res.m_storage){
-                x = std::sin(x);
-            }
-            return res;
+            return unary_transform([](auto x){ return std::sin(x); });
         }
 
         array cos() const {
-            array res (*this);
-            for(auto& x : res.m_storage){
-                x = std::cos(x);
-            }
-            return res;
+            return unary_transform([](auto x){ return std::cos(x); });
         }
 
         array tan() const {
-            array res (*this);
-            for(auto& x : res.m_storage){
-                x = std::tan(x);
-            }
-            return res;
+            return unary_transform([](auto x){ return std::tan(x); });
         }
-
 
         /***********************************************************************************/
         /********************************** Iterators **************************************/
@@ -865,8 +801,35 @@ namespace npp{
             }
         }
 
+        /************************************ Helpers *******************************************/
+        template<typename Scalar, typename Op>
+        array& scalar_assign(Scalar value, Op op) {
+            for (auto& x : m_storage) {
+                x = op(x, value);
+            }
+            return *this;
+        }
 
-        /************************************ Comparing with scalar operators *******************************************/
+        template<typename Op>
+        array& elementwise_assign(const array& other, Op op) {
+            checkShape(other);
+        
+            for (std::size_t i = 0; i < m_storage.size(); ++i) {
+                m_storage[i] = op(m_storage[i], other.m_storage[i]);
+            }
+        
+            return *this;
+        }
+
+        template<typename Func>
+        array unary_transform(Func f) const {
+            array res(*this);
+            for(auto& x : res.m_storage)
+                x = f(x);
+        
+            return res;
+        }
+
         template<typename Scalar, typename Compare>
         array<bool, Rank> compare(Scalar value, Compare cmp) const {
             array<bool, Rank> res(m_shape);
