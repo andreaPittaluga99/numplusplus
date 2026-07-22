@@ -10,6 +10,7 @@
 #include <utility>
 #include <initializer_list>
 #include <cmath>
+#include <cstdint>
 
 
 /*
@@ -99,6 +100,28 @@ void getShape(typename nested_initializer<T, CurrentRank>::type init, std::array
 
 */
 
+
+
+/************************************* Boolean support *************************************/
+class bool_reference {
+    std::uint8_t& value;
+
+public:
+
+    bool_reference(std::uint8_t& v)
+        : value(v)
+    {}
+
+    operator bool() const{
+        return value != 0;
+    }
+
+    bool_reference& operator=(bool b){
+        value = b ? 1 : 0;
+        return *this;
+    }
+};
+
 namespace npp{
 
 
@@ -108,6 +131,14 @@ namespace npp{
         static_assert(std::is_arithmetic_v<T>, "npp::array error: T must be an arithmetic type");
 
         public:
+        /*
+            IMPORTANT: we need to specify that we internally use std::vector<std::uint8_t> for booleans.
+            This way we can do something like array > 3 and get back a N-tensor of booleans
+        */
+        using storage_type = std::conditional_t<
+            std::is_same_v<T,bool>,
+            std::vector<std::uint8_t>,
+            std::vector<T>>;
 
         /***********************************************************************************/
         /********************************** Constructors ***********************************/
@@ -160,10 +191,16 @@ namespace npp{
             m_storage(other.m_storage),
             m_stride(other.m_stride){}
 
-
-        array(const std::array<size_t,Rank>& shape, const std::vector<T>& data)
+        /*
+            Constructs an array from an existing storage vector.
+            
+            The input type is storage_type instead of std::vector<T>
+            because bool arrays internally use std::vector<uint8_t>
+            instead of std::vector<bool>.
+        */
+        array(const std::array<size_t,Rank>& shape, const storage_type& data)
         :   m_shape(shape), 
-            m_storage(std::move(data)){
+            m_storage(data){
                 if(m_storage.size() != findSize(shape)){
                     throw std::invalid_argument("npp::array error: incompatible data size");
                 }
@@ -185,26 +222,39 @@ namespace npp{
         /***********************************************************************************/
         
         template<typename... Index>
-        const T& operator()(Index... indices) const {
-            return m_storage[calculateIndex(normalizeIndices(indices...))];
+        decltype(auto) operator()(Index... indices){
+            auto idx = calculateIndex(normalizeIndices(indices...));
+        
+            if constexpr(std::is_same_v<T,bool>){
+                return bool_reference(m_storage[idx]);
+            }
+            else{
+                return (m_storage[idx]);
+            }
         }
 
         template<typename... Index>
-        T& operator()(Index... indices){
-            return m_storage[calculateIndex(normalizeIndices(indices...))];
+        auto operator()(Index... indices) const{
+            auto idx = calculateIndex(normalizeIndices(indices...));
+            if constexpr(std::is_same_v<T,bool>){
+                return m_storage[idx] != 0;
+            }
+            else{
+                return static_cast<const T&>(m_storage[idx]);
+            }
         }
 
 
         // operator[] is an alias for operator() in the Rank == 1 case
         template<std::size_t R = Rank>
         requires (R == 1)
-        T& operator[](std::ptrdiff_t i){
+        decltype(auto) operator[](std::ptrdiff_t i){
             return (*this)(i);
         }
 
         template<std::size_t R = Rank>
         requires (R == 1)
-        const T& operator[](std::ptrdiff_t i) const{
+        auto operator[](std::ptrdiff_t i) const{
             return (*this)(i);
         }
 
@@ -236,6 +286,8 @@ namespace npp{
             return !(*this == other);
         }
 
+        template<typename U = T>
+        requires (!std::is_same_v<U,bool>)
         array& operator+= (const array& other){
             checkShape(other);
             for (std::size_t i = 0; i < m_storage.size(); ++i){
@@ -244,6 +296,8 @@ namespace npp{
             return *this;
         }
 
+        template<typename U = T>
+        requires (!std::is_same_v<U,bool>)
         [[nodiscard]]
         array operator+ (const array& other) const {
             array res(*this);
@@ -251,6 +305,8 @@ namespace npp{
             return res; 
         }
 
+        template<typename U = T>
+        requires (!std::is_same_v<U,bool>)
         array& operator-= (const array& other){
             checkShape(other);
             for (std::size_t i = 0; i < m_storage.size(); ++i){
@@ -259,6 +315,8 @@ namespace npp{
             return *this;
         }
 
+        template<typename U = T>
+        requires (!std::is_same_v<U,bool>)
         [[nodiscard]]
         array operator- (const array& other) const {
             array res(*this);
@@ -266,6 +324,8 @@ namespace npp{
             return res; 
         }
 
+        template<typename U = T>
+        requires (!std::is_same_v<U,bool>)
         array& operator*= (const array& other){
             checkShape(other);
             for (std::size_t i = 0; i < m_storage.size(); ++i){
@@ -274,6 +334,8 @@ namespace npp{
             return *this;
         }
 
+        template<typename U = T>
+        requires (!std::is_same_v<U,bool>)
         [[nodiscard]]
         array operator* (const array& other) const {
             array res(*this);
@@ -281,6 +343,8 @@ namespace npp{
             return res; 
         }
 
+        template<typename U = T>
+        requires (!std::is_same_v<U,bool>)
         array& operator/= (const array& other){
             checkShape(other);
             for (std::size_t i = 0; i < m_storage.size(); ++i){
@@ -289,6 +353,8 @@ namespace npp{
             return *this;
         }
 
+        template<typename U = T>
+        requires (!std::is_same_v<U,bool>)
         [[nodiscard]]
         array operator/ (const array& other) const {
             array res(*this);
@@ -300,7 +366,7 @@ namespace npp{
         /*********************************** Scalar operators ******************************/
 
         template<typename Scalar>
-        requires std::is_arithmetic_v<Scalar>
+        requires (std::is_arithmetic_v<Scalar> && !std::is_same_v<T,bool>)
         array& operator+= (Scalar value){
             for(auto& x : m_storage){
                 x += value;
@@ -310,7 +376,7 @@ namespace npp{
 
 
         template<typename Scalar>
-        requires std::is_arithmetic_v<Scalar>
+        requires (std::is_arithmetic_v<Scalar> && !std::is_same_v<T,bool>)
         [[nodiscard]]
         array operator+ (Scalar value) const{
             array res(*this);
@@ -319,7 +385,7 @@ namespace npp{
         }
         
         template<typename Scalar>
-        requires std::is_arithmetic_v<Scalar>
+        requires (std::is_arithmetic_v<Scalar> && !std::is_same_v<T,bool>)
         array& operator-= (Scalar value){
             for(auto& x : m_storage){
                 x -= value;
@@ -329,7 +395,7 @@ namespace npp{
 
 
         template<typename Scalar>
-        requires std::is_arithmetic_v<Scalar>
+        requires (std::is_arithmetic_v<Scalar> && !std::is_same_v<T,bool>)
         [[nodiscard]]
         array operator- (Scalar value) const{
             array res(*this);
@@ -338,7 +404,7 @@ namespace npp{
         }
         
         template<typename Scalar>
-        requires std::is_arithmetic_v<Scalar>
+        requires (std::is_arithmetic_v<Scalar> && !std::is_same_v<T,bool>)
         array& operator*= (Scalar value){
             for(auto& x : m_storage){
                 x *= value;
@@ -346,9 +412,8 @@ namespace npp{
             return *this;
         }
 
-
         template<typename Scalar>
-        requires std::is_arithmetic_v<Scalar>
+        requires (std::is_arithmetic_v<Scalar> && !std::is_same_v<T,bool>)
         [[nodiscard]]
         array operator* (Scalar value) const{
             array res(*this);
@@ -357,7 +422,7 @@ namespace npp{
         }
         
         template<typename Scalar>
-        requires std::is_arithmetic_v<Scalar>
+        requires (std::is_arithmetic_v<Scalar> && !std::is_same_v<T,bool>)
         array& operator/= (Scalar value){
             for(auto& x : m_storage){
                 x /= value;
@@ -367,12 +432,42 @@ namespace npp{
 
 
         template<typename Scalar>
-        requires std::is_arithmetic_v<Scalar>
+        requires (std::is_arithmetic_v<Scalar> && !std::is_same_v<T,bool>)
         [[nodiscard]]
         array operator/ (Scalar value) const{
             array res(*this);
             res /= value;
             return res;
+        }
+
+        template<typename Scalar>
+        requires (std::is_arithmetic_v<Scalar> && !std::is_same_v<T,bool>)
+        array<bool, Rank> operator>(Scalar value) const {
+            return compare(value, std::greater<>{});
+        }
+
+        template<typename Scalar>
+        requires (std::is_arithmetic_v<Scalar> && !std::is_same_v<T,bool>)
+        array<bool, Rank> operator<(Scalar value) const {
+            return compare(value, std::less<>{});
+        }
+
+        template<typename Scalar>
+        requires (std::is_arithmetic_v<Scalar> && !std::is_same_v<T,bool>)
+        array<bool, Rank> operator>=(Scalar value) const {
+            return compare(value, std::greater_equal<>{});
+        }
+
+        template<typename Scalar>
+        requires (std::is_arithmetic_v<Scalar> && !std::is_same_v<T,bool>)
+        array<bool, Rank> operator<=(Scalar value) const {
+            return compare(value, std::less_equal<>{});
+        }
+
+        template<typename Scalar>
+        requires (std::is_arithmetic_v<Scalar> && !std::is_same_v<T,bool>)
+        array<bool, Rank> operator==(Scalar value) const {
+            return compare(value, std::equal_to<>{});
         }
         
         /******************************** Reduction operations ***************************/
@@ -520,38 +615,71 @@ namespace npp{
         /********************************** Iterators **************************************/
         /***********************************************************************************/
 
-        typename std::vector<T>::const_iterator begin() const noexcept { return m_storage.begin(); }
-        
-        typename std::vector<T>::iterator begin() noexcept { return m_storage.begin(); }
-        
-        typename std::vector<T>::const_iterator end() const noexcept{ return m_storage.end(); }
+        typename storage_type::const_iterator begin() const noexcept { return m_storage.begin(); }
 
-        typename std::vector<T>::iterator end() noexcept { return m_storage.end(); }
+        typename storage_type::iterator begin() noexcept { return m_storage.begin(); }
         
-        typename std::vector<T>::const_iterator cbegin() const noexcept { return m_storage.cbegin(); }
+        typename storage_type::const_iterator end() const noexcept{ return m_storage.end(); }
 
-        typename std::vector<T>::const_iterator cend() const noexcept { return m_storage.cend(); }
+        typename storage_type::iterator end() noexcept { return m_storage.end(); }
+        
+        typename storage_type::const_iterator cbegin() const noexcept { return m_storage.cbegin(); }
+
+        typename storage_type::const_iterator cend() const noexcept { return m_storage.cend(); }
+
+
+        /*
+            bool arrays are stored as uint8_t instead of using std::vector<bool>:
+            vector<bool> uses a proxy reference and cannot provide a valid bool*.
+            All other element types return the actual pointer from the underlying storage.
+        */
+        [[nodiscard]]
+        auto data() noexcept {
+            if constexpr(std::is_same_v<T,bool>) {
+                return static_cast<std::uint8_t*>(nullptr);
+            }
+            else {
+                return m_storage.empty() ? nullptr : m_storage.data();
+            }
+        }
 
         [[nodiscard]]
-        const T* data() const noexcept { return m_storage.empty() ? nullptr : m_storage.data(); }
-
-        [[nodiscard]]
-        T* data() noexcept { return m_storage.empty() ? nullptr : m_storage.data(); }
+        auto data() const noexcept {
+            if constexpr(std::is_same_v<T,bool>) {
+                return static_cast<const std::uint8_t*>(nullptr);
+            }
+            else {
+                return m_storage.empty() ? nullptr : m_storage.data();
+            }
+        }
 
         /***********************************************************************************/
         /********************************** functions **************************************/
         /***********************************************************************************/
 
         template<typename... Index>
-        const T& at(Index... indices) const {
+        decltype(auto) at(Index... indices){
             auto idx = checkIndices(indices...);
-            return m_storage[calculateIndex(idx)];
+        
+            if constexpr(std::is_same_v<T,bool>){
+                return bool_reference(m_storage[calculateIndex(idx)]);
+            }
+            else{
+                return (m_storage[calculateIndex(idx)]);
+            }
         }
 
+
         template<typename... Index>
-        T& at(Index... indices){
+        auto at(Index... indices) const {
             auto idx = checkIndices(indices...);
-            return m_storage[calculateIndex(idx)];
+        
+            if constexpr(std::is_same_v<T,bool>){
+                return m_storage[calculateIndex(idx)] != 0;
+            }
+            else{
+                return static_cast<const T&>(m_storage[calculateIndex(idx)]);
+            }
         }
 
 
@@ -606,7 +734,7 @@ namespace npp{
     private:
 
         std::array<std::size_t, Rank> m_shape;
-        std::vector<T> m_storage;
+        storage_type m_storage;
         std::array<std::size_t, Rank> m_stride;
 
 
@@ -731,11 +859,23 @@ namespace npp{
             }
         }
 
+
+        /************************************ Comparing with scalar operators *******************************************/
+        template<typename Scalar, typename Compare>
+        array<bool, Rank> compare(Scalar value, Compare cmp) const {
+            array<bool, Rank> res(m_shape);
+            for(std::size_t i = 0; i < m_storage.size(); ++i){
+                res[i] = cmp(m_storage[i], value);
+            }
+        
+            return res;
+        }
+
     }; //class
 
     /************************************ Scalars Operators *********************************************/
     template<typename T, std::size_t Rank, typename Scalar>
-    requires std::is_arithmetic_v<Scalar>
+    requires (std::is_arithmetic_v<Scalar> && !std::is_same_v<T,bool>)
     [[nodiscard]]
     array<T, Rank> operator+(Scalar value, const array<T, Rank>& arr){
         array<T, Rank> res(arr);
@@ -747,7 +887,7 @@ namespace npp{
     }
 
     template<typename T, std::size_t Rank, typename Scalar>
-    requires std::is_arithmetic_v<Scalar>
+    requires (std::is_arithmetic_v<Scalar> && !std::is_same_v<T,bool>)
     [[nodiscard]]
     array<T, Rank> operator-(Scalar value, const array<T, Rank>& arr){
         array<T, Rank> res(arr);
@@ -759,7 +899,7 @@ namespace npp{
     }
 
     template<typename T, std::size_t Rank, typename Scalar>
-    requires std::is_arithmetic_v<Scalar>
+    requires (std::is_arithmetic_v<Scalar> && !std::is_same_v<T,bool>)
     [[nodiscard]]
     array<T, Rank> operator*(Scalar value, const array<T, Rank>& arr){
         array<T, Rank> res(arr);
@@ -771,7 +911,7 @@ namespace npp{
     }
 
     template<typename T, std::size_t Rank, typename Scalar>
-    requires std::is_arithmetic_v<Scalar>
+    requires (std::is_arithmetic_v<Scalar> && !std::is_same_v<T,bool>)
     [[nodiscard]]
     array<T, Rank> operator/(Scalar value, const array<T, Rank>& arr){
         array<T, Rank> res(arr);

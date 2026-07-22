@@ -1575,6 +1575,135 @@ void testMathTan(){
     std::cout << "[OK] tan\n";
 }
 
+void testBoolArray(){
+
+    npp::array<bool,1> a({4});
+
+    a[0]=true;
+    a[1]=false;
+    a[2]=true;
+    a[3]=false;
+
+    assert(a[0]);
+    assert(!a[1]);
+    assert(a[2]);
+    assert(!a[3]);
+
+    std::cout << "[OK] bool array\n";
+}
+
+void testScalarGreater(){
+    npp::array<int,1> a({5});
+
+    a[0] = 1;
+    a[1] = 5;
+    a[2] = 6;
+    a[3] = 3;
+    a[4] = 10;
+
+    auto b = a > 5;
+
+    static_assert(std::is_same_v<decltype(b), npp::array<bool,1>>);
+
+    assert(b[0] == false);
+    assert(b[1] == false);
+    assert(b[2] == true);
+    assert(b[3] == false);
+    assert(b[4] == true);
+
+    std::cout << "[OK] scalar >\n";
+}
+
+void testScalarLess(){
+    npp::array<int,1> a({5});
+
+    a[0] = 1;
+    a[1] = 5;
+    a[2] = 6;
+    a[3] = 3;
+    a[4] = 10;
+
+    auto b = a < 5;
+
+    static_assert(std::is_same_v<decltype(b), npp::array<bool,1>>);
+
+    assert(b[0] == true);
+    assert(b[1] == false);
+    assert(b[2] == false);
+    assert(b[3] == true);
+    assert(b[4] == false);
+
+    std::cout << "[OK] scalar <\n";
+}
+
+void testScalarGreaterEqual(){
+    npp::array<int,1> a({5});
+
+    a[0] = 1;
+    a[1] = 5;
+    a[2] = 6;
+    a[3] = 5;
+    a[4] = 10;
+
+    auto b = a >= 5;
+
+    static_assert(std::is_same_v<decltype(b), npp::array<bool,1>>);
+
+    assert(b[0] == false);
+    assert(b[1] == true);
+    assert(b[2] == true);
+    assert(b[3] == true);
+    assert(b[4] == true);
+
+    std::cout << "[OK] scalar >=\n";
+}
+
+void testScalarLessEqual(){
+    npp::array<int,1> a({5});
+
+    a[0] = 1;
+    a[1] = 5;
+    a[2] = 6;
+    a[3] = 3;
+    a[4] = 10;
+
+    auto b = a <= 5;
+
+    static_assert(std::is_same_v<decltype(b), npp::array<bool,1>>);
+
+    assert(b[0] == true);
+    assert(b[1] == true);
+    assert(b[2] == false);
+    assert(b[3] == true);
+    assert(b[4] == false);
+
+    std::cout << "[OK] scalar <=\n";
+}
+
+void testScalarEqual(){
+    npp::array<int,1> a({5});
+
+    a[0] = 1;
+    a[1] = 5;
+    a[2] = 6;
+    a[3] = 5;
+    a[4] = 10;
+
+    auto b = a == 5;
+
+    static_assert(std::is_same_v<decltype(b), npp::array<bool,1>>);
+
+    assert(b[0] == false);
+    assert(b[1] == true);
+    assert(b[2] == false);
+    assert(b[3] == true);
+    assert(b[4] == false);
+
+    std::cout << "[OK] scalar ==\n";
+}
+
+
+
 int main(){
     testConstruction();
     testValueConstructor();
@@ -1666,6 +1795,13 @@ int main(){
     testMathSin();
     testMathCos();
     testMathTan();
+    testBoolArray();
+    testScalarGreater();
+    testScalarLess();
+    testScalarGreaterEqual();
+    testScalarLessEqual();
+    testScalarEqual();
+
 
     std::cout << "\nALL TESTS PASSED\n";
 }
