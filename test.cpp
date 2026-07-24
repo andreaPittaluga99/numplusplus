@@ -1826,6 +1826,325 @@ void testLinspaceEmpty(){
     std::cout << "[OK] linspace empty\n";
 }
 
+void testFloor(){
+    npp::array<double,1> a({5});
+
+    a[0] = 1.2;
+    a[1] = 2.9;
+    a[2] = -1.2;
+    a[3] = -2.9;
+    a[4] = 5.0;
+
+    auto b = a.floor();
+
+    static_assert(std::is_same_v<decltype(b), npp::array<double,1>>);
+
+    assert(b[0] == 1.0);
+    assert(b[1] == 2.0);
+    assert(b[2] == -2.0);
+    assert(b[3] == -3.0);
+    assert(b[4] == 5.0);
+
+    std::cout << "[OK] floor\n";
+}
+
+
+void testCeil(){
+    npp::array<double,1> a({5});
+
+    a[0] = 1.2;
+    a[1] = 2.9;
+    a[2] = -1.2;
+    a[3] = -2.9;
+    a[4] = 5.0;
+
+    auto b = a.ceil();
+
+    static_assert(std::is_same_v<decltype(b), npp::array<double,1>>);
+
+    assert(b[0] == 2.0);
+    assert(b[1] == 3.0);
+    assert(b[2] == -1.0);
+    assert(b[3] == -2.0);
+    assert(b[4] == 5.0);
+
+    std::cout << "[OK] ceil\n";
+}
+
+
+void testRound(){
+    npp::array<double,1> a({5});
+
+    a[0] = 1.2;
+    a[1] = 1.5;
+    a[2] = 2.7;
+    a[3] = -1.5;
+    a[4] = -2.7;
+
+    auto b = a.round();
+
+    static_assert(std::is_same_v<decltype(b), npp::array<double,1>>);
+
+    assert(b[0] == 1.0);
+    assert(b[1] == 2.0);
+    assert(b[2] == 3.0);
+    assert(b[3] == -2.0);
+    assert(b[4] == -3.0);
+
+    std::cout << "[OK] round\n";
+}
+
+
+void testAsin(){
+    npp::array<double,1> a({5});
+
+    a[0] = 0.0;
+    a[1] = 1.0;
+    a[2] = -1.0;
+    a[3] = 0.5;
+    a[4] = -0.5;
+
+    auto b = a.asin();
+
+    static_assert(std::is_same_v<decltype(b), npp::array<double,1>>);
+
+    assert(b[0] == 0.0);
+    assert(b[1] == std::asin(1.0));
+    assert(b[2] == std::asin(-1.0));
+    assert(b[3] == std::asin(0.5));
+    assert(b[4] == std::asin(-0.5));
+
+    std::cout << "[OK] asin\n";
+}
+
+
+void testAcos(){
+    npp::array<double,1> a({5});
+
+    a[0] = 1.0;
+    a[1] = 0.0;
+    a[2] = -1.0;
+    a[3] = 0.5;
+    a[4] = -0.5;
+
+    auto b = a.acos();
+
+    static_assert(std::is_same_v<decltype(b), npp::array<double,1>>);
+
+    assert(b[0] == std::acos(1.0));
+    assert(b[1] == std::acos(0.0));
+    assert(b[2] == std::acos(-1.0));
+    assert(b[3] == std::acos(0.5));
+    assert(b[4] == std::acos(-0.5));
+
+    std::cout << "[OK] acos\n";
+}
+
+
+void testAtan(){
+    npp::array<double,1> a({5});
+
+    a[0] = 0.0;
+    a[1] = 1.0;
+    a[2] = -1.0;
+    a[3] = 2.0;
+    a[4] = -2.0;
+
+    auto b = a.atan();
+
+    static_assert(std::is_same_v<decltype(b), npp::array<double,1>>);
+
+    assert(b[0] == std::atan(0.0));
+    assert(b[1] == std::atan(1.0));
+    assert(b[2] == std::atan(-1.0));
+    assert(b[3] == std::atan(2.0));
+    assert(b[4] == std::atan(-2.0));
+
+    std::cout << "[OK] atan\n";
+}
+
+
+void testSinh(){
+    npp::array<double,1> a({5});
+
+    a[0] = 0.0;
+    a[1] = 1.0;
+    a[2] = -1.0;
+    a[3] = 2.0;
+    a[4] = -2.0;
+
+    auto b = a.sinh();
+
+    static_assert(std::is_same_v<decltype(b), npp::array<double,1>>);
+
+    assert(b[0] == std::sinh(0.0));
+    assert(b[1] == std::sinh(1.0));
+    assert(b[2] == std::sinh(-1.0));
+    assert(b[3] == std::sinh(2.0));
+    assert(b[4] == std::sinh(-2.0));
+
+    std::cout << "[OK] sinh\n";
+}
+
+
+void testCosh(){
+    npp::array<double,1> a({5});
+
+    a[0] = 0.0;
+    a[1] = 1.0;
+    a[2] = -1.0;
+    a[3] = 2.0;
+    a[4] = -2.0;
+
+    auto b = a.cosh();
+
+    static_assert(std::is_same_v<decltype(b), npp::array<double,1>>);
+
+    assert(b[0] == std::cosh(0.0));
+    assert(b[1] == std::cosh(1.0));
+    assert(b[2] == std::cosh(-1.0));
+    assert(b[3] == std::cosh(2.0));
+    assert(b[4] == std::cosh(-2.0));
+
+    std::cout << "[OK] cosh\n";
+}
+
+
+void testTanh(){
+    npp::array<double,1> a({5});
+
+    a[0] = 0.0;
+    a[1] = 1.0;
+    a[2] = -1.0;
+    a[3] = 2.0;
+    a[4] = -2.0;
+
+    auto b = a.tanh();
+
+    static_assert(std::is_same_v<decltype(b), npp::array<double,1>>);
+
+    assert(b[0] == std::tanh(0.0));
+    assert(b[1] == std::tanh(1.0));
+    assert(b[2] == std::tanh(-1.0));
+    assert(b[3] == std::tanh(2.0));
+    assert(b[4] == std::tanh(-2.0));
+
+    std::cout << "[OK] tanh\n";
+}
+
+
+void testPow(){
+    npp::array<double,1> a({5});
+
+    a[0] = 1.0;
+    a[1] = 2.0;
+    a[2] = 3.0;
+    a[3] = 4.0;
+    a[4] = 5.0;
+
+    auto b = a.pow(2.0);
+
+    static_assert(std::is_same_v<decltype(b), npp::array<double,1>>);
+
+    assert(b[0] == 1.0);
+    assert(b[1] == 4.0);
+    assert(b[2] == 9.0);
+    assert(b[3] == 16.0);
+    assert(b[4] == 25.0);
+
+    std::cout << "[OK] pow\n";
+}
+
+
+void testPowFractional(){
+    npp::array<double,1> a({5});
+
+    a[0] = 1.0;
+    a[1] = 4.0;
+    a[2] = 9.0;
+    a[3] = 16.0;
+    a[4] = 25.0;
+
+    auto b = a.pow(0.5);
+
+    static_assert(std::is_same_v<decltype(b), npp::array<double,1>>);
+
+    assert(b[0] == 1.0);
+    assert(b[1] == 2.0);
+    assert(b[2] == 3.0);
+    assert(b[3] == 4.0);
+    assert(b[4] == 5.0);
+
+    std::cout << "[OK] pow fractional\n";
+}
+
+
+void testPowNegativeExponent(){
+    npp::array<double,1> a({4});
+
+    a[0] = 1.0;
+    a[1] = 2.0;
+    a[2] = 4.0;
+    a[3] = 8.0;
+
+    auto b = a.pow(-1.0);
+
+    static_assert(std::is_same_v<decltype(b), npp::array<double,1>>);
+
+    assert(b[0] == 1.0);
+    assert(b[1] == 0.5);
+    assert(b[2] == 0.25);
+    assert(b[3] == 0.125);
+
+    std::cout << "[OK] pow negative exponent\n";
+}
+
+
+void testPowMatrix(){
+    npp::array<double,2> a({2,2});
+
+    a(0,0) = 1.0;
+    a(0,1) = 2.0;
+    a(1,0) = 3.0;
+    a(1,1) = 4.0;
+
+    auto b = a.pow(2.0);
+
+    static_assert(std::is_same_v<decltype(b), npp::array<double,2>>);
+
+    assert(b(0,0) == 1.0);
+    assert(b(0,1) == 4.0);
+    assert(b(1,0) == 9.0);
+    assert(b(1,1) == 16.0);
+
+    assert(b.shape() == a.shape());
+
+    std::cout << "[OK] pow matrix\n";
+}
+
+
+void testPowZero(){
+    npp::array<double,1> a({5});
+
+    a[0] = 1.0;
+    a[1] = 2.0;
+    a[2] = 3.0;
+    a[3] = 4.0;
+    a[4] = 5.0;
+
+    auto b = a.pow(0.0);
+
+    static_assert(std::is_same_v<decltype(b), npp::array<double,1>>);
+
+    assert(b[0] == 1.0);
+    assert(b[1] == 1.0);
+    assert(b[2] == 1.0);
+    assert(b[3] == 1.0);
+    assert(b[4] == 1.0);
+
+    std::cout << "[OK] pow zero exponent\n";
+}
+
 
 int main(){
     testConstruction();
@@ -1932,6 +2251,20 @@ int main(){
     testLinspace();
     testLinspaceSingle();
     testLinspaceEmpty();
+    testFloor();
+    testCeil();
+    testRound();
+    testAsin();
+    testAcos();
+    testAtan();
+    testSinh();
+    testCosh();
+    testTanh();
+    testPow();
+    testPowFractional();
+    testPowNegativeExponent();
+    testPowMatrix();
+    testPowZero();
 
 
     std::cout << "\nALL TESTS PASSED\n";

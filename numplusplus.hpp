@@ -607,6 +607,61 @@ namespace npp{
             return unary_transform([](auto x){ return std::tan(x); });
         }
 
+        array floor() const {
+            return unary_transform([](auto x){ return std::floor(x); });
+        }
+
+        array ceil() const {
+            return unary_transform([](auto x){ return std::ceil(x); });
+        }
+
+        array round() const {
+            return unary_transform([](auto x){ return std::round(x); });
+        }
+
+        array asin() const {
+            return unary_transform([](auto x){ return std::asin(x); });
+        }
+
+        array acos() const {
+            return unary_transform([](auto x){ return std::acos(x); });
+        }
+
+        array atan() const {
+            return unary_transform([](auto x){ return std::atan(x); });
+        }
+
+        array sinh() const {
+            return unary_transform([](auto x){ return std::sinh(x); });
+        }
+
+        array cosh() const {
+            return unary_transform([](auto x){ return std::cosh(x); });
+        }
+
+        array tanh() const {
+            return unary_transform([](auto x){ return std::tanh(x); });
+        }
+
+        template<typename Scalar>
+        requires (std::is_arithmetic_v<Scalar>)
+        array pow(Scalar exponent) const {
+            return unary_transform([exponent](auto x){ return std::pow(x, exponent); });
+        }
+
+
+        /*
+        pow()
+floor()
+ceil()
+round()
+asin()
+acos()
+atan()
+sinh()
+cosh()
+tanh()
+        */
         /***********************************************************************************/
         /********************************** Iterators **************************************/
         /***********************************************************************************/
