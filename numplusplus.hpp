@@ -151,15 +151,15 @@ namespace npp{
             Storage is allocated according to the total number of elements.
             Elements are value-initialized by std::vector.
         */
-        array(const std::array<std::size_t, Rank>& params)
-        :   m_shape(params), 
-            m_storage(findSize(params)){
+        array(const std::array<std::size_t, Rank>& shape)
+        :   m_shape(shape), 
+            m_storage(findSize(shape)){
                 computeStride();
         }
 
-        array(const std::array<std::size_t, Rank>& params, T value)
-        :   m_shape(params), 
-            m_storage(findSize(params), value){
+        array(const std::array<std::size_t, Rank>& shape, T value)
+        :   m_shape(shape), 
+            m_storage(findSize(shape), value){
                 computeStride();
         }
 
@@ -215,6 +215,60 @@ namespace npp{
                     throw std::invalid_argument("npp::array error: incompatible data size");
                 }
                 computeStride();
+        }
+
+
+        /************************** Factory constructors ***********************************/
+
+        static array zeros(const std::array<std::size_t, Rank>& shape) {
+            return array(shape, T{0});
+        }
+
+        static array ones(const std::array<std::size_t, Rank>& shape) {
+            return array(shape, T{1});
+        }
+
+
+        static array full(const std::array<std::size_t, Rank>& shape, T value){
+            return array(shape, value);
+        }
+
+        template<std::size_t R = Rank>
+        requires (R == 2)
+        static array identity(std::size_t n){
+            array res({n, n}, T{0});
+            for (std::size_t i = 0; i < n; ++i){
+                res(i, i) = T{1};
+            }
+            return res;
+        }
+
+        //auto x = array<double,1>::linspace(0.0,1.0,5);
+
+        template<std::size_t R = Rank>
+        requires (R == 1 && std::is_floating_point_v<T>)
+        static array linspace (T start, T end, std::size_t steps){
+            array res ({steps});
+
+            if (steps == 0){
+                return res;
+            }
+            if (steps == 1){
+                res[0] = start;
+                return res;
+            }
+            T unit = (end - start) / static_cast<T>(steps - 1);
+            T curr = start;
+            for(std::size_t i = 0; i < steps; ++i){
+                res.m_storage[i] = curr;
+                curr += unit;
+            }
+
+            // for example, if end == 1, the last element could be 0.9999 due to floating point errors
+            // so we set it manually 
+            res.m_storage.back() = end;
+
+            return res;
         }
 
         /***********************************************************************************/

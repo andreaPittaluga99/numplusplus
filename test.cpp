@@ -1725,6 +1725,107 @@ void testScalarNotEqual(){
 }
 
 
+void testZeros(){
+    auto a = npp::array<int,2>::zeros({2,3});
+
+    assert((a.shape() == std::array<std::size_t,2>{2,3}));
+    assert(a.size() == 6);
+
+    for(auto x : a){
+        assert(x == 0);
+    }
+
+    std::cout << "[OK] zeros\n";
+}
+
+
+void testOnes(){
+    auto a = npp::array<int,2>::ones({2,3});
+
+    assert((a.shape() == std::array<std::size_t,2>{2,3}));
+    assert(a.size() == 6);
+
+    for(auto x : a){
+        assert(x == 1);
+    }
+
+    std::cout << "[OK] ones\n";
+}
+
+
+void testFull(){
+    auto a = npp::array<int,3>::full({2,2,2}, 7);
+
+    assert((a.shape() == std::array<std::size_t,3>{2,2,2}));
+    assert(a.size() == 8);
+
+    for(auto x : a){
+        assert(x == 7);
+    }
+
+    std::cout << "[OK] full\n";
+}
+
+
+void testIdentity(){
+    auto a = npp::array<double,2>::identity(3);
+
+    static_assert(std::is_same_v<decltype(a), npp::array<double,2>>);
+
+    assert((a.shape() == std::array<std::size_t,2>{3,3}));
+
+    assert(a(0,0) == 1.0);
+    assert(a(0,1) == 0.0);
+    assert(a(0,2) == 0.0);
+
+    assert(a(1,0) == 0.0);
+    assert(a(1,1) == 1.0);
+    assert(a(1,2) == 0.0);
+
+    assert(a(2,0) == 0.0);
+    assert(a(2,1) == 0.0);
+    assert(a(2,2) == 1.0);
+
+    std::cout << "[OK] identity\n";
+}
+
+
+void testLinspace(){
+    auto a = npp::array<double,1>::linspace(0.0, 1.0, 5);
+
+    static_assert(std::is_same_v<decltype(a), npp::array<double,1>>);
+
+    assert(a.size() == 5);
+
+    assert(a[0] == 0.0);
+    assert(a[1] == 0.25);
+    assert(a[2] == 0.5);
+    assert(a[3] == 0.75);
+    assert(a[4] == 1.0);
+
+    std::cout << "[OK] linspace\n";
+}
+
+
+void testLinspaceSingle(){
+    auto a = npp::array<float,1>::linspace(3.0f, 10.0f, 1);
+
+    assert(a.size() == 1);
+    assert(a[0] == 3.0f);
+
+    std::cout << "[OK] linspace single\n";
+}
+
+
+void testLinspaceEmpty(){
+    auto a = npp::array<double,1>::linspace(0.0, 1.0, 0);
+
+    assert(a.empty());
+    assert(a.size() == 0);
+
+    std::cout << "[OK] linspace empty\n";
+}
+
 
 int main(){
     testConstruction();
@@ -1824,6 +1925,13 @@ int main(){
     testScalarLessEqual();
     testScalarEqual();
     testScalarNotEqual();
+    testZeros();
+    testOnes();
+    testFull();
+    testIdentity();
+    testLinspace();
+    testLinspaceSingle();
+    testLinspaceEmpty();
 
 
     std::cout << "\nALL TESTS PASSED\n";
